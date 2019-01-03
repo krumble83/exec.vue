@@ -1,0 +1,42 @@
+
+<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		
+	</head>
+	
+	<body>
+	
+	<script type="text/x-template" id="worksheetTpl">
+		<svg style="width:100%;height:100%" :id="id" :class="cls" xmlns="http://www.w3.org/2000/svg">
+			<slot></slot>
+			<use xlink:href="#titlebar" />
+		</svg>
+	</script>
+	
+	<script type="text/x-template" id="titlebarTpl">
+		<g id="titlebar" class="titlebar">
+			<rect width="100%" height="40"></rect>
+			<text font-family="Helvetica, Arial, sans-serif" class="title" x="100" y="-0.796875" stroke="#fff">
+				<tspan dy="20.8" x="100">{{title}}</tspan>
+			</text>
+			<slot></slot>
+		</g>
+	</script>
+	
+	<script type="text/x-template" id="titlebarButtonTpl">
+		<image id="SvgjsImage1055" :href="exsvg/img/undo.png" width="32" height="32" :x="10" :y="3" class="undoredo undo"></image>
+	</script>
+	
+	
+	
+	<div id="app">
+		<ex-worksheet id="toto">
+			<ex-titlebar title="toto"></ex-titlebar>
+			<rect x="10" y="30" width="20" height="20" fill="#f00"></rect>
+		</ex-worksheet>
+	</div>
+	<script src="index.js"></script>
+	</body>
+	
+</html>
