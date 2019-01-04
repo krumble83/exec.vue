@@ -5,7 +5,7 @@ const SvgShape = {
       px: '',
       py: '',
 	  h: '',
-	  w: ''
+	  w: '',
     }
   },
   eventHandlers: {
@@ -16,6 +16,14 @@ const SvgShape = {
 }
 
 const Selectable = {
+  data (){
+	return {
+      selected: false,
+	  on: {
+		mouseup: function(){console.log('rr')}
+      }
+  }
+  },
   methods: {
     selectMouseDown(e) {
       this.oPos = {
@@ -28,8 +36,9 @@ const Selectable = {
     selectMouseUp() {
       document.removeEventListener("mousemove", this.dragMouseMove);
       this.oPos = {};
-    }
-  }	
+    },
+	test(){console.log('ff')}
+  },
 }
 
 const Draggable = {
@@ -41,6 +50,7 @@ const Draggable = {
       }
     }
   },
+  
   methods: {
     dragMouseMove(e) {
       const xDiff = this.oPos.x - e.pageX;
@@ -56,16 +66,25 @@ const Draggable = {
         x: e.pageX,
         y: e.pageY
       };
+	  
+	  this.$el.parentNode.append(this.$el);
+	  this.selected = true;
+	  //this.$el.parentNode.addChild(this.$el);
       document.addEventListener("mousemove", this.dragMouseMove);
 	  document.addEventListener("mouseup", this.dragMouseUp);
+	  //console.dir(this);
     },
     dragMouseUp() {
       document.removeEventListener("mousemove", this.dragMouseMove);
 	  document.removeEventListener("mouseup", this.dragMouseUp);
       this.oPos = {};
     },
-	test(){
-		console.dir(this)
+	contextMouseUp(){
+		if(this.selected)
+			console.log('contextMenu');
+	},
+	focus(){
+		
 	}
   }
 }
@@ -80,7 +99,7 @@ Vue.component('Node', {
       py: this.y,
       h: this.height,
       w: this.width,
-      fillIt: this.fill
+      fillIt: this.fill,
     }
   },
   template: "#node"
@@ -89,5 +108,22 @@ Vue.component('Node', {
 
 new Vue ({
   el: '#meow',
-  data: {}
+  data: {
+    rects: [
+      {
+        x: 0,
+        y: 10,
+        width: 150,
+        height: 150,
+        fill: '#FF8A80'
+      },
+       {
+        x: 200,
+        y: 10,
+        width: 150,
+        height: 150,
+        fill: '#E040FB'
+      },
+    ]
+  }
 })
