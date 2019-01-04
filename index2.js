@@ -1,4 +1,5 @@
 
+
 const SvgShape = {
   data () {
     return {
@@ -61,6 +62,7 @@ const Draggable = {
       this.px = this.px - xDiff;
       this.py = this.py - yDiff;
     },
+	
     dragMouseDown(e) {
       this.oPos = {
         x: e.pageX,
@@ -74,15 +76,18 @@ const Draggable = {
 	  document.addEventListener("mouseup", this.dragMouseUp);
 	  //console.dir(this);
     },
+	
     dragMouseUp() {
       document.removeEventListener("mousemove", this.dragMouseMove);
 	  document.removeEventListener("mouseup", this.dragMouseUp);
       this.oPos = {};
     },
+	
 	contextMouseUp(){
 		if(this.selected)
 			console.log('contextMenu');
 	},
+	
 	focus(){
 		
 	}
@@ -106,7 +111,7 @@ Vue.component('Node', {
 })
 
 
-new Vue ({
+var v = new Vue ({
   el: '#meow',
   data: {
     rects: [
@@ -126,4 +131,4 @@ new Vue ({
       },
     ]
   }
-})
+});

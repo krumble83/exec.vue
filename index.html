@@ -1,42 +1,111 @@
 
 <html>
 	<head>
+		<link rel="stylesheet" type="text/css" href="css.css" media="all">
 		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-		
+		<script>
+			function toto(a){
+				console.dir(a);
+			}
+		</script>
 	</head>
 	
 	<body>
 	
 	<script type="text/x-template" id="worksheetTpl">
-		<svg style="width:100%;height:100%" :id="id" :class="cls" xmlns="http://www.w3.org/2000/svg">
+		<svg 
+			style="width:100%;height:100%" 
+			:class="cls" 
+			xmlns="http://www.w3.org/2000/svg" 
+			ref="worksheet" 
+			@contextmenu.prevent=""
+		>
+			<defs><slot name="defs" /></defs>
 			<slot></slot>
+			<svg>
+				<g class="exNodes">
+					<ex-node 
+						v-for="(node, idx) in nodes"
+						class="exNode"
+						:x="node.x"
+						:y="node.y"
+						:width="node.width"
+						:height="node.height"
+					/>
+					<ex-node title="Make Array" subtitle="Target is me" class="exNode" :x="300" :y="300" :width="100" :height="100" />
+				</g>
+				<g class="exLinks"></g>
+				<g class="exSelection"></g>
+			</svg>
 			<use xlink:href="#titlebar" />
 		</svg>
 	</script>
 	
 	<script type="text/x-template" id="titlebarTpl">
-		<g id="titlebar" class="titlebar">
+		<g class="exTitlebar" id="titlebar">
 			<rect width="100%" height="40"></rect>
-			<text font-family="Helvetica, Arial, sans-serif" class="title" x="100" y="-0.796875" stroke="#fff">
-				<tspan dy="20.8" x="100">{{title}}</tspan>
+			<text font-family="Helvetica, Arial, sans-serif" class="exTitlebarTitle" :x="100" y="25" stroke="#fff">
+				<tspan>{{title}}</tspan>
 			</text>
 			<slot></slot>
 		</g>
 	</script>
 	
 	<script type="text/x-template" id="titlebarButtonTpl">
-		<image id="SvgjsImage1055" :href="exsvg/img/undo.png" width="32" height="32" :x="10" :y="3" class="undoredo undo"></image>
+		<image width="32" height="32" :x="getTitleButtonPos()" y="3" class="undoredo undo"></image>
 	</script>
 	
+	<script type="text/x-template" id="exnodeTpl">
+			<svg
+				:class="{selected:this.selected}"
+				:id="mId"
+				:x="px" 
+				:y="py" 
+				:width="w" 
+				:height="h" 
+				:title.sync="mTitle"
+				@mousedown.left.stop="dragMouseDown" 
+				@mouseup.right.prevent.stop="contextMouseUp" 
+				@contextmenu.prevent.stop="" 
+			>
+				<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
+				
+				<rect v-if="mTitle" class="exNodeTitle" width="100%" :height="mSubtitle ? 38 : 20" :fill="mColor" />
+				<text v-if="mTitle" class="exNodeTitle" x="10" y="15">{{mTitle}}</text>
+				<text v-if="mSubtitle" class="exNodeSubtitle" x="10" y="32">{{mSubtitle}}</text>
+				
+				<g class="exInputs"><slot name="inputs" /></g>
+				<g class="exOutputs"><slot name="outputs" /></g>
+			</svg>
+	</script>
 	
+	<script type="text/x-template" id="expinTpl">
+		<g 
+			:id="mId"
+				:x="px" 
+				:y="py" 
+				:width="w" 
+				:height="h" 
+				:label="mLabel"
+				:type="mType"
+		>
+	</script>
 	
 	<div id="app">
-		<ex-worksheet id="toto">
-			<ex-titlebar title="toto"></ex-titlebar>
-			<rect x="10" y="30" width="20" height="20" fill="#f00"></rect>
+		<ex-worksheet id="toto" ref="worksheet" class="exWorksheet">
+			<ex-titlebar title="toto" ref="titlebar">
+				<ex-titlebarbutton href="undo.png" ref="btn_undo" />
+				<ex-titlebarbutton href="undo.png" ref="btn_undo" />
+			</ex-titlebar>
+			<!--<rect x="10" y="30" width="20" height="20" fill="#f00"></rect>-->
 		</ex-worksheet>
 	</div>
+	<script src="node.js"></script>
 	<script src="index.js"></script>
+	<script>
+		console.log(app)
+		app.addNode({})
+	</script>
 	</body>
 	
 </html>

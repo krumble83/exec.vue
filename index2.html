@@ -25,10 +25,34 @@
 	</div>
 
 	<template id="node">
-	   <rect @mousedown.left="dragMouseDown" @mouseup.right.prevent.stop="contextMouseUp" @contextmenu.prevent="" :x="px" :y="py" :width="w" :height="h" :fill="fillIt" :class="{selected:this.selected}"></rect>
+		<svg width="300">
+	   <rect 
+		@mousedown.left="dragMouseDown" 
+		@mouseup.right.prevent.stop="contextMouseUp" 
+		@contextmenu.prevent="" 
+		:x="px" 
+		:y="py" 
+		:width="w" 
+		:height="h" 
+		:fill="fillIt" 
+		:class="{selected:this.selected}"
+	  />
+	  </svg>
 	</template>
 
 	<script src="index2.js"></script>
+	<script>
+		var t = {
+        x: 0,
+        y: 500,
+        width: 150,
+        height: 150,
+        fill: '#008A80'
+      }
+	v.rects.push(t);
+	t.width = 500;
+	 console.dir(v.rects);
+	</script>
 	</body>
 	
 </html>
