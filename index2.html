@@ -1,0 +1,41 @@
+
+<html>
+	<head>
+		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		
+	</head>
+	
+	<body>
+	
+	<div id="meow">
+	  <svg id="svg" width="800" height="800">
+		  <Node id="test" :x="10" :y="10" :width="100" :height="100" />
+		  <g><rect x="300" y="300" width="100" height="100" fill="#000"></rect></g>
+	  </svg>
+	</div>
+
+	<template id="node">
+	   <rect 
+			 @mousedown.left="dragMouseDown"
+			 :x="px"
+			 :y="py"
+			 :width="w"
+			 :height="h"
+			 :fill="fillIt"    
+		   >
+	   </rect>
+	</template>
+
+	<script src="index2.js"></script>
+	</body>
+	
+</html>
+
+<!--
+
+<g>
+	<rect />
+	<g><slot name="inputs" /></>
+	<g><slot name="outputs" /></>
+</g>
+-->
