@@ -154,8 +154,8 @@
 			:label="mLabel"
 			:type="mType"
 			:color="mColor"
-			@mousedown.left.stop="startLink"
-			@mouseup.left="stopLink"
+			@mousedown.left.stop="$emit('startLink')"
+			@mouseup.left="$emit('stopLink')"
 		>
 			<rect x="0" y="0" :width="mWidth" :height="mHeight" />
 			<template v-if="mType == 'input'">

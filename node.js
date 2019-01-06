@@ -9,6 +9,7 @@ const SvgBase = {
 		width: {default: 100}, 
 		height: {default: 100}
 	},
+	
 	data () {
 		return {
 			mId: this.id,
@@ -20,7 +21,10 @@ const SvgBase = {
 	}
 }
 
-const Selectable = {
+
+
+
+const NodeSelectable = {
 	data (){
 		return {
 			selected: false,
@@ -45,7 +49,7 @@ const Selectable = {
 	},
 }
 
-const Draggable = {
+const NodeDraggable = {
 	inject: ['getGridPosition'],
 	
 	mounted: function(){
@@ -135,65 +139,8 @@ const Draggable = {
 	}
 }
 
-
-
-
-Vue.directive('scale', {
-  // Quand l'élément lié est inséré dans le DOM...
-  inserted: function (el, args, node) {
-    if(node.context.update)
-		node.context.update();
-  }
-})
-
-var PinComponent = {
-	mixins: [SvgBase],
-	props: {
-		height: {default: 16},
-		ctor: {default: 'ex-pin'},
-		label: String, 
-		type: String,
-		flags: String,
-		color: {default: '#00f'},
-		isarray: Boolean,
-	},
-	
-	data () {
-		return {
-			mLabel: this.label,
-			mType: this.type,
-			mColor: this.color,
-			mFlags: this.flags,
-		}
-	},
-	
-	watch: {
-	},
-	
-	mounted: function(){
-		this.update();
-	},
-	
-	methods: {
-		update: function(){
-			var me = this;
-			setTimeout(function(){
-				me.mWidth = 100;
-				//me.$el.setAttribute('width', '100');
-			}, 100);
-		},
-		
-		startLink: function(){console.log('startLink')},
-		stopLink: function(){console.log('stopLink')}
-	},
-	
-	template: "#expinTpl"
-};
-Vue.component('ex-pin', PinComponent);
-
-
-var NodeComponent = {
-	mixins: [SvgBase, Draggable],
+const NodeComponent = {
+	mixins: [SvgBase, NodeDraggable],
 		
 	props: {
 		title: String, 
@@ -340,23 +287,56 @@ Vue.component('ex-node', NodeComponent);
 
 
 
-var SyncProps = {
-	beforeCreate: function(){
-		console.log(this);
-		var name = '';
 
-		for(var index in this.$props) { 
-			if (!this.$props.hasOwnProperty(index))
-				continue;
-				
-			name = 'm' + index.charAt(0).toUpperCase() + index.slice(1);
-			if(typeof this.$data[name] === "undefined"){
-				console.log('no ' + name);
-				continue;
-			}
-			console.log('m' + index.charAt(0).toUpperCase() + index.slice(1));
-			this.$watch(index, function(val){this[name] = val;});
-		}
+const PinForeignEditor = {
+	props: {
+		editor: String,
 	}
 }
+
+const PinComponent = {
+	mixins: [SvgBase, PinForeignEditor],
+	props: {
+		height: {default: 16},
+		ctor: {default: 'ex-pin'},
+		label: String, 
+		type: String,
+		flags: String,
+		color: {default: '#00f'},
+		isarray: Boolean,
+	},
+	
+	data () {
+		return {
+			mLabel: this.label,
+			mType: this.type,
+			mColor: this.color,
+			mFlags: this.flags,
+		}
+	},
+	
+	watch: {
+	},
+	
+	mounted: function(){
+		this.update();
+	},
+	
+	methods: {
+		update: function(){
+			var me = this;
+			setTimeout(function(){
+				me.mWidth = 100;
+				//me.$el.setAttribute('width', '100');
+			}, 100);
+		},
+		
+		startLink: function(){console.log('startLink')},
+		stopLink: function(){console.log('stopLink')}
+	},
+	
+	template: "#expinTpl"
+};
+Vue.component('ex-pin', PinComponent);
+
 
