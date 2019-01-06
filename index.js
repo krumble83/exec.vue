@@ -14,13 +14,14 @@ var WorksheetGrid = {
 	provide: {
 		getGridPosition: function(x, y){
 			if(typeof x !== "undefined" && typeof y === "undefined")
-				return parseInt(x/25)*25;
+				return parseInt(x/16)*16;
 			else if(typeof y !== "undefined" && typeof x === "undefined")
-				return parseInt(y/25)*25;
+				return parseInt(y/16)*16;
 			else
-				return {x: parseInt(x/25)*25, y: parseInt(y/25)*25};
+				return {x: parseInt(x/16)*16, y: parseInt(y/16)*16};
 		}
 	},
+	
 	data: function(){
 		var me = this
 			, smallId = this.getUid()
@@ -70,10 +71,24 @@ var WorksheetGrid = {
 		})
 		
 		return {
-			snap: 25,
+			snap: 16,
 			gridId: medId
 		}
 	},
+	
+	mounted: function(){		
+		var panzoom = svgPanZoom(this.$el, {
+			viewportSelector: '.exWorkspace', 
+			fit: false, 
+			center: false,
+			zoomScaleSensitivity: 0.4,
+			minZoom: 0.05,
+			maxZoom: 1,
+			useGlobalMove: true,
+			restrictPanButton: 2,
+		});
+		this.$emit('panzoom', panzoom);
+	}
 }
 
 
@@ -98,39 +113,36 @@ var worksheetComponent = {
 		cls: String,
 	},
 	
-	provide: {
-		addDef: this.addDef,
-
-		getSvgMousePosition(evt) {
-			var CTM = this.$el.getScreenCTM();
-			return {
-				x: (evt.clientX - CTM.e) / CTM.a,
-				y: (evt.clientY - CTM.f) / CTM.d
-			};
-		},
-	},
-	
 	methods: {
 		addNode: function(data){
+			//console.log(this._provided);
 			if(typeof data.ctor !== 'String')
 				data.ctor = 'ex-node';
+
+			if(typeof data.id !== 'String')
+				data.id = this.getUid();
+
 			if(data.inputs){
 				Array.from(data.inputs).forEach(function (el, i) {
 					if(typeof el.ctor !== 'String')
 						data.inputs[i].ctor = 'ex-pin';
+					data.inputs[i].type="input";
 				});
 			}
 			if(data.outputs){
 				Array.from(data.outputs).forEach(function (el, i) {
 					if(typeof el.ctor !== 'String')
 						data.outputs[i].ctor = 'ex-pin';
+					data.inputs[i].type="output";
 				});
 			}
-			console.log(data);
 			this.nodes.push(data);
 		},
 		addDef: function(data){
 			var me = this;
+			
+			//console.log(data);
+			
 			if(Array.isArray(data)){
 				data.forEach(function(el){
 					me.addDef(el);
@@ -154,18 +166,29 @@ var worksheetComponent = {
 			return data.id;
 		},
 		
-		alertz: function(){
-			console.log('zz');
-			alert('');
+		onContextMenu: function(){
+			console.log('worksheet:onContextMenu');
 		},
 		
 		onRightButtonDown: function(ev){
-			console.log(arguments);
-			ev.preventDefault();
-			lastPageCoords.x = ev.pageX;
-			lastPageCoords.y = ev.pageY;
+			console.log('worksheet:onRightButtonDown');
+		},
+		
+		onRightButtonUp: function(ev){
+			console.log('worksheet:onRightButtonUp');
 		}
 	},
+
+	provide: {
+		getSvgMousePosition(evt) {
+			var CTM = this.$el.getScreenCTM();
+			return {
+				x: (evt.clientX - CTM.e) / CTM.a,
+				y: (evt.clientY - CTM.f) / CTM.d
+			};
+		},
+	},
+	
 
 	template: '#worksheetTpl'
 };

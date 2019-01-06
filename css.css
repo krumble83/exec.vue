@@ -11,7 +11,6 @@
 	cursor: move;
 	stroke: none;
 	fill: none;
-	pointer-events : all;
 
 	-webkit-user-select: none; /* Safari */        
 	-moz-user-select: none; /* Firefox */
@@ -22,8 +21,7 @@
 .exWorksheet .exNode rect.exNodeBody{
 	stroke: #000;
 	stroke-width:  1px;
-	fill: none;
-	pointer-events : all;
+	fill: #000;
 
 	-webkit-user-select: none; /* Safari */        
 	-moz-user-select: none; /* Firefox */
@@ -32,18 +30,23 @@
 }
 
 .exWorksheet .exNode text.exNodeTitle{
-	font-size: 14px;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 12px;
 	stroke: none;
 	fill: #fff;
 }
 
 .exWorksheet .exNode text.exNodeSubtitle{
+	font-family: Helvetica, Arial, sans-serif;
 	font-size: 12px;
 	stroke: none;
 	fill: #999;
 }
 
 
+.exWorksheet .exNode .exHeader{
+	stroke: none;
+}
 
 
 .exWorksheet .exNode .exPin{
@@ -51,9 +54,18 @@
 	cursor: crosshair;	
 }
 
+.exWorksheet .exNode.dragging .exPin{
+	pointer-events : none;
+}
+
 .exWorksheet .exNode .exPin circle{
-	stroke: #000;
 	stroke-width: 3px;
+}
+
+.exWorksheet .exNode .exPin .label{
+	stroke-width: 0;
+    font-size: 16px;
+    fill: #fff;
 }
 
 
