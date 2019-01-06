@@ -3,6 +3,7 @@
 	<head>
 		<link rel="stylesheet" type="text/css" href="css.css" media="all">
 		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+		<script src="libs/svg-pan-zoom.js"></script>
 		<script>
 			function toto(a){
 				console.dir(a);
@@ -11,85 +12,138 @@
 	</head>
 	
 	<body>
-	
-	<script type="text/x-template" id="worksheetTpl">
+
+	<template id="worksheetTpl">
 		<svg 
 			style="width:100%;height:100%" 
 			:class="cls" 
 			xmlns="http://www.w3.org/2000/svg" 
 			ref="worksheet" 
-			@contextmenu.prevent=""
+			@contextmenu.prevent.stop="alertz" 
+			@mousedown.right="onRightButtonDown"
 		>
-			<defs><slot name="defs" /></defs>
+			<defs>
+				<template v-for="(def, idx) in defs">
+					<component v-bind="def.props">
+						<component v-for="(subdef, idx) in def.childs" v-bind="subdef.props" />
+					</component>
+				</template>
+				<slot name="defs" />
+			</defs>
+
 			<slot></slot>
-			<svg>
+
+			<rect width="100%" height="100%" class="background" />
+			<g class="exWorkspace">
+				<rect width="100000" height="100000" transform="translate(-50000,-50000)" :fill="'url(#' + gridId + ')'" />
 				<g class="exNodes">
-					<ex-node 
-						v-for="(node, idx) in nodes"
-						class="exNode"
-						:x="node.x"
-						:y="node.y"
-						:width="node.width"
-						:height="node.height"
-					/>
-					<ex-node title="Make Array" subtitle="Target is me" class="exNode" :x="300" :y="300" :width="100" :height="100" />
+					<template v-for="(node, idx) in nodes">
+						<component 
+								:is="node.ctor" 
+								class="exNode"
+								:id="node.id"
+								:x.sync="node.x"
+								:y.sync="node.y"
+								:width="node.width"
+								:height="node.height"
+								:title.sync="node.title"
+								:subtitle="node.subtitle"
+								:type="node.type"
+								:flags="node.flags"
+								:color.sync="node.color"
+						>
+							<component v-for="pin in node.inputs" :key="node.id" 
+								:is="pin.ctor" 
+								slot="inputs" 
+								:class="pin.class"
+								:label="pin.label"
+								:type="pin.type"
+								:x="pin.x"
+								:y="pin.y" 
+								:width="pin.width"
+							/>
+							<component v-for="pin in node.outputs" :key="pin.id" 
+								:is="pin.ctor" 
+								slot="inputs" 
+								:class="pin.class"
+								:label="pin.label"
+								:type="pin.type"
+							/>
+						</component>
+					</template>
+					<slot name="nodes" />
 				</g>
-				<g class="exLinks"></g>
+				<g class="exLinks">
+					<slot name="links" />
+				</g>
 				<g class="exSelection"></g>
-			</svg>
+			</g>
 			<use xlink:href="#titlebar" />
 		</svg>
-	</script>
+	</template>
+
 	
-	<script type="text/x-template" id="titlebarTpl">
+	<template id="titlebarTpl">
 		<g class="exTitlebar" id="titlebar">
 			<rect width="100%" height="40"></rect>
-			<text font-family="Helvetica, Arial, sans-serif" class="exTitlebarTitle" :x="100" y="25" stroke="#fff">
+			<text :x="100" y="25" stroke="#fff">
 				<tspan>{{title}}</tspan>
 			</text>
 			<slot></slot>
 		</g>
-	</script>
+	</template>
 	
 	<script type="text/x-template" id="titlebarButtonTpl">
 		<image width="32" height="32" :x="getTitleButtonPos()" y="3" class="undoredo undo"></image>
 	</script>
 	
-	<script type="text/x-template" id="exnodeTpl">
+	<template id="exnodeTpl">
 			<svg
 				:class="{selected:this.selected}"
 				:id="mId"
-				:x="px" 
-				:y="py" 
-				:width="w" 
-				:height="h" 
+				:x.sync="mX" 
+				:y.sync="mY" 
+				:width="mWidth" 
+				:height="mWidth" 
 				:title.sync="mTitle"
+				:subtitle="mSubtitle"
+				:type="mType"
+				:flags="mFlags"
+				:color="mColor"
 				@mousedown.left.stop="dragMouseDown" 
-				@mouseup.right.prevent.stop="contextMouseUp" 
-				@contextmenu.prevent.stop="" 
+				@contextmenu.prevent.stop="alertz" 
 			>
 				<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
-				
 				<rect v-if="mTitle" class="exNodeTitle" width="100%" :height="mSubtitle ? 38 : 20" :fill="mColor" />
-				<text v-if="mTitle" class="exNodeTitle" x="10" y="15">{{mTitle}}</text>
-				<text v-if="mSubtitle" class="exNodeSubtitle" x="10" y="32">{{mSubtitle}}</text>
+				<g class="title">
+					<text v-if="mTitle" class="exNodeTitle" x="10" y="15">{{mTitle}}</text>
+					<text v-if="mSubtitle" class="exNodeSubtitle" x="10" y="32">{{mSubtitle}}</text>
+				</g>
 				
-				<g class="exInputs"><slot name="inputs" /></g>
+				<g class="exInputs" transform="translate(5,40)"><slot name="inputs" /></g>
 				<g class="exOutputs"><slot name="outputs" /></g>
 			</svg>
-	</script>
+	</template>
 	
-	<script type="text/x-template" id="expinTpl">
-		<g 
+	<template id="expinTpl">
+		<svg 
 			:id="mId"
-				:x="px" 
-				:y="py" 
-				:width="w" 
-				:height="h" 
-				:label="mLabel"
-				:type="mType"
+			class="exPin"
+			:x="mX" 
+			:y="mY" 
+			:width="mWidth" 
+			:height="mHeight" 
+			:label="mLabel"
+			:type="mType"
+			preserveAspectRatio="none"
+			v-scale
+			@mousedown.stop="startLink"
+			@mouseup="stopLink"
 		>
-	</script>
+		<rect width="100%" height="100%" />
+		<circle cx="7" cy="7" r="5" />
+		</svg>
+	</template>
 	
 	<div id="app">
 		<ex-worksheet id="toto" ref="worksheet" class="exWorksheet">
@@ -97,14 +151,41 @@
 				<ex-titlebarbutton href="undo.png" ref="btn_undo" />
 				<ex-titlebarbutton href="undo.png" ref="btn_undo" />
 			</ex-titlebar>
-			<!--<rect x="10" y="30" width="20" height="20" fill="#f00"></rect>-->
 		</ex-worksheet>
 	</div>
 	<script src="node.js"></script>
+	<script src="panzoom.js"></script>
 	<script src="index.js"></script>
 	<script>
+	
+		var svgElement = document.querySelector('.exWorksheet');
+		
+		var panZoom = svgPanZoom(svgElement, {
+			viewportSelector: '.exWorkspace', 
+			fit: false, 
+			center: false,
+			zoomScaleSensitivity: 0.4,
+			minZoom: 0.05,
+			maxZoom: 1,
+			useGlobalMove: true,
+			restrictPanButton: 2,
+		});
+	
+		var n = {
+			title: 'Make Array',
+			subtitle: 'target is me',
+			color: '#00f',
+			x: 300,
+			y: 300,
+			width: 200,
+			height: 300,
+			inputs: [
+				{id: 'toto', label: 'test'}
+			],
+			flags: 'ok',
+		};
+		app.addNode(n);
 		console.log(app)
-		app.addNode({})
 	</script>
 	</body>
 	

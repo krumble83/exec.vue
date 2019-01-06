@@ -42,3 +42,37 @@
 	stroke: none;
 	fill: #999;
 }
+
+
+
+
+.exWorksheet .exNode .exPin{
+	pointer-events : all;
+	cursor: crosshair;	
+}
+
+.exWorksheet .exNode .exPin circle{
+	stroke: #000;
+	stroke-width: 3px;
+}
+
+
+.exTitlebar text {
+	font-family: "Helvetica, Arial, sans-serif";
+}
+
+
+.exWorksheet .background{
+	fill: #262626;
+}
+
+.medGrid{
+	stroke: #161616;
+	stroke-width: 1;
+}
+
+.smallGrid{
+	stroke: #343434;
+	stroke-width: 1;
+	fill: #262626;
+}

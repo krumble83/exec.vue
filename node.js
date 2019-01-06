@@ -6,16 +6,16 @@ const SvgBase = {
 		id: {type: String, default: function(){return this.getUid()}},
 		x: {default: 0}, 
 		y: {default: 0}, 
-		width: {default: 100}, 
-		height: {default: 200}
+		width: {default: 10}, 
+		height: {default: 10}
 	},
 	data () {
 		return {
 			mId: this.id,
-			px: this.x,
-			py: this.y,
-			h: this.height,
-			w: this.width,
+			mX: this.x,
+			mY: this.y,
+			mHeight: this.height,
+			mWidth: this.width,
 		}
 	}
 }
@@ -46,25 +46,51 @@ const Selectable = {
 }
 
 const Draggable = {
-  inject: ['getGridPosition'],
-  data () {
-    return {
-      oPos: {
-        x: 0,
-        y: 0
-      }
-    }
-  },
+	inject: ['getGridPosition', 'getSvgMousePosition'],
+	
+	data () {
+		return {
+			oPos: {
+				x: 0,
+				y: 0
+			},
+			offset: {x: 0, y: 0},
+		}
+	},
   
-  methods: {
+	methods: {
+	
+		dragMouseMove(evt) {
+			var coord = this.getSvgMousePosition(evt);
+			this.$el.setAttributeNS(null, 'x', coord.x - this.offset.x);
+			this.$el.setAttributeNS(null, 'y', coord.y - this.offset.y);
+			//this.mX = coord.x - this.offset.x
+			//this.mY = coord.y - this.offset.y
+		},
+		
+		dragMouseDown(evt) {
+			this.offset = this.getSvgMousePosition(evt);
+			this.offset.x -= parseFloat(this.mX);
+			this.offset.y -= parseFloat(this.mX);
+			document.addEventListener("mousemove", this.dragMouseMove);
+			document.addEventListener("mouseup", this.dragMouseUp);
+		},
+		
+		dragMouseUp(evt) {
+			document.removeEventListener("mousemove", this.dragMouseMove);
+			document.removeEventListener("mouseup", this.dragMouseUp);			
+		},
+	
+	/*
+	
     dragMouseMove(e) {
       const xDiff = this.oPos.x - e.pageX;
       const yDiff = this.oPos.y - e.pageY;
   
       this.oPos.x = e.pageX;
       this.oPos.y = e.pageY;
-      this.px = this.getGridPosition(e.pageX);
-      this.py = this.getGridPosition(e.pageY);
+      this.mX = this.getGridPosition(e.pageX);
+      this.mY = this.getGridPosition(e.pageY);
     },
 	
     dragMouseDown(e) {
@@ -91,6 +117,7 @@ const Draggable = {
 		if(this.selected)
 			console.log('contextMenu');
 	},
+	*/
 	
 	focus(){
 		
@@ -98,25 +125,103 @@ const Draggable = {
   }
 }
 
+Vue.directive('scale', {
+  // Quand l'élément lié est inséré dans le DOM...
+  inserted: function (el, args, node) {
+    if(node.context.update)
+		node.context.update();
+  }
+})
+
+Vue.component('ex-pin', {
+	mixins: [SvgBase],
+	props: {
+		height: {default: 20},
+		ctor: {default: 'ex-pin'},
+		label: String, 
+		type: String,
+		flags: String,
+		color: {default: '#00f'},
+		isarray: Boolean,
+	},
+	
+	data () {
+		return {
+			mLabel: this.label,
+			mType: this.type,
+			mColor: this.color,
+			mFlags: this.flags,
+		}
+	},
+	
+	watch: {
+	},
+	
+	mounted: function(){
+		this.update();
+	},
+	
+	methods: {
+		update: function(){
+			var me = this;
+			setTimeout(function(){
+				me.$el.setAttribute('width', '100');
+			}, 100);
+		},
+		
+		startLink: function(){},
+		stopLink: function(){}
+	},
+	
+	template: "#expinTpl"
+})
+
+
+var SyncProps = {
+	beforeCreate: function(){
+		console.log(this);
+		var name = '';
+
+		for(var index in this.$props) { 
+			if (!this.$props.hasOwnProperty(index))
+				continue;
+				
+			name = 'm' + index.charAt(0).toUpperCase() + index.slice(1);
+			if(typeof this.$data[name] === "undefined"){
+				console.log('no ' + name);
+				continue;
+			}
+			console.log('m' + index.charAt(0).toUpperCase() + index.slice(1));
+			this.$watch(index, function(val){this[name] = val;});
+		}
+	}
+}
 
 Vue.component('ex-node', {
-	mixins: [SvgBase, Draggable, Selectable],
+	mixins: [SvgBase, Draggable],
+	
+	inject: ['addDef'],
+	
 	props: {
 		title: String, 
 		subtitle: String,
+		type: String,
+		flags: String,
 		color: {default: '#00f'},
-		img: String,
+		img: String
 	},
 	
 	data () {
 		return {
 			mTitle: this.title,
 			mSubtitle: this.subtitle,
+			mType: this.type || '',
+			mFlags: this.flags,
 			mColor: this.color,
 			mImg: this.img,
 			
-			inputs: {},
-			outputs: {},
+			//inputs: {},
+			//outputs: {},
 		}
 	},
 	
@@ -125,9 +230,14 @@ Vue.component('ex-node', {
 		mSubtitle: function(){this.update()},
 	},
 	
+	mounted: function(){
+		this.update();
+	},
+	
 	methods: {
 		update: function(){
 			var me = this;
+			console.log(me.$el.querySelector('g.title').getBoundingClientRect());
 			setTimeout(function(){
 				var maxWidth = 0
 					, el;
@@ -143,6 +253,10 @@ Vue.component('ex-node', {
 				console.log(maxWidth);
 				me.w = maxWidth;				
 			}, 100);
+		},
+		alertz: function(){
+			console.log('zz');
+			alert('');
 		}
 	},
 	
