@@ -92,9 +92,111 @@ var WorksheetGrid = {
 }
 
 
+let SelectionRectangle = {
+	
+	template: `
+		<rect :x="mX" :y="mY" width="100" class="selection" height="100" />
+	`,
+  
+	props: {
+		x: {type: Number, default: 200},
+		y: {type: Number, default: 200},
+	},
+  
+	data () {
+		return {
+			mX: this.x,
+			mY: this.y,
+		}
+	},
+
+}
+
+
+var worksheetSelection = {
+	
+	methods: {
+		startSelection: function(evt){
+			const svg = evt.currentTarget.closest("svg");
+			const point = svg.createSVGPoint();
+			const transform = svg.getScreenCTM().inverse();
+			
+			var getPosss = function(mouseEvent, point) {
+				point.x = (mouseEvent.clientX);
+				point.y = (mouseEvent.clientY);
+			}
+			
+			this.workspace.push(SelectionRectangle);
+			var svgDropPoint;
+			
+			const main_group_selector = svg.querySelector(".svg-pan-zoom_viewport");
+
+			var getPos = function(evt, point) {
+				svgDropPoint = svg.createSVGPoint();
+
+				svgDropPoint.x = evt.clientX;
+				svgDropPoint.y = evt.clientY;
+
+				svgDropPoint = svgDropPoint.matrixTransform(main_group_selector.getCTM().inverse());
+				point.x = svgDropPoint.x;
+				point.y = svgDropPoint.y;
+			}
+			
+			var newPt
+			, offset;
+			
+			getPos(evt, point);			
+			SelectionRectangle.x = point.x;
+			SelectionRectangle.y = point.y;
+			console.log(SelectionRectangle, point);
+						
+			return;
+			
+			const updateFn = () => {
+				if (this.classObject.dragging) 
+					requestAnimationFrame(updateFn);
+
+				newPt = point.matrixTransform(transform);
+				
+				if(this.getGridPosition){
+					this.mX = this.getGridPosition(newPt.x - offset.x);
+					this.mY = this.getGridPosition(newPt.y - offset.y);					
+				}
+				else {
+					this.mX = newPt.x - offset.x;
+					this.mY = newPt.y - offset.y;
+				}
+				//this.$emit('dragmove', {x: this.mX, y: this.mY});
+			}
+			
+			const moveFn = (evt) => {
+				getPos(evt, point);
+				this.$emit('dragmove', evt);
+			}
+			
+			const stopFn = (evt) => {
+				this.classObject.dragging = false;
+				svg.removeEventListener('mousemove', moveFn);
+				svg.removeEventListener('mouseup', stopFn);
+				this.$emit('dragend', evt);
+			}
+
+			requestAnimationFrame(updateFn);
+			moveFn(evt);
+
+			this.$el.parentNode.append(this.$el);
+			this.classObject.dragging = true;
+			svg.addEventListener('mousemove', moveFn);
+			svg.addEventListener('mouseup', stopFn);
+			this.$emit('dragstart', evt);			
+		}
+	}
+	
+}
+
 var worksheetComponent = {
 	inject: ['getUid'],
-	mixins: [WorksheetGrid],
+	mixins: [WorksheetGrid, worksheetSelection],
 	
 	data: function(){
 		return {
@@ -102,6 +204,7 @@ var worksheetComponent = {
 			nodes: [],
 			links: [],
 			selection: [],
+			workspace: [],
 		}
 	},
 	
@@ -135,6 +238,14 @@ var worksheetComponent = {
 			}
 			this.nodes.push(data);
 		},
+		
+		addLink: function(startPin, evt){
+			this.links.push({
+				starPin: startPin,
+				startEvt: evt,
+			});
+		},
+		
 		addDef: function(data){
 			var me = this;
 			

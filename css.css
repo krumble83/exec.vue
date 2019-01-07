@@ -48,6 +48,13 @@
 	display:none;
 }
 
+
+.ExWorksheet .selection{
+	stroke: #000;
+	stroke-width: 1px;
+	fill: #fff;
+}
+
 .exWorksheet .exNode .exHeader{
 	stroke: none;
 }

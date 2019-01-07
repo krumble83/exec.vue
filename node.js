@@ -22,8 +22,6 @@ const SvgBase = {
 }
 
 
-
-
 const NodeSelectable = {
 	data (){
 		return {
@@ -32,7 +30,9 @@ const NodeSelectable = {
 			}
 		}
 	},
+	
 	methods: {
+		
 	},
 }
 
@@ -300,6 +300,21 @@ Vue.component('ex-node', NodeComponent);
 
 
 
+const PinLink = {
+	data (){
+		return {
+			classObject: {
+				linked: false,
+			},
+			on : {
+				update: function(){
+					console.log('alert');
+				}
+			}
+		}
+	},
+}
+
 const PinForeignEditor = {
 	props: {
 		editor: String,
@@ -307,7 +322,7 @@ const PinForeignEditor = {
 }
 
 const PinComponent = {
-	mixins: [SvgBase, PinForeignEditor],
+	mixins: [SvgBase, PinLink, PinForeignEditor],
 	props: {
 		height: {default: 16},
 		ctor: {default: 'ex-pin'},
@@ -319,6 +334,7 @@ const PinComponent = {
 		optionnal: Boolean,
 		isarray: Boolean,
 		groupe: {type: String},
+		editor: false,
 	},
 	
 	data () {
@@ -359,6 +375,8 @@ const PinComponent = {
 	template: "#expinTpl"
 };
 Vue.component('ex-pin', PinComponent);
+
+
 
 
 
