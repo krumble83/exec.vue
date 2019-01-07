@@ -262,7 +262,7 @@ const NodeComponent = {
 			, outputsBox;
 			
 			// inputs
-			inputs.setAttribute('transform', 'translate(7, ' + (headBox.y + headBox.height + 10) + ')');
+			inputs.setAttribute('transform', 'translate(0, ' + (headBox.y + headBox.height + 10) + ')');
 			
 			//outputs
 			inputsBox = inputs.getBBox();
