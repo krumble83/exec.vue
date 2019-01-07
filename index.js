@@ -102,6 +102,13 @@ let SelectionRectangle = {
 		x: {type: Number, default: 200},
 		y: {type: Number, default: 200},
 	},
+	
+	methods: {
+		update: function(x,y){
+			this.x = x;
+			this.y = y;
+		}
+	},
   
 	data () {
 		return {
@@ -112,11 +119,13 @@ let SelectionRectangle = {
 
 }
 
-
 var worksheetSelection = {
 	
 	methods: {
 		startSelection: function(evt){
+			
+			return;
+			
 			const svg = evt.currentTarget.closest("svg");
 			const point = svg.createSVGPoint();
 			const transform = svg.getScreenCTM().inverse();
@@ -143,12 +152,15 @@ var worksheetSelection = {
 			}
 			
 			var newPt
-			, offset;
+			, oPos;
 			
-			getPos(evt, point);			
+			getPos(evt, point);
+			oPos = {x: point.x, y: point.y};
+			
+			console.log(point.x);
+			//SelectionRectangle.methods.update(point.x, point.y);
 			SelectionRectangle.x = point.x;
 			SelectionRectangle.y = point.y;
-			console.log(SelectionRectangle, point);
 						
 			return;
 			

@@ -6,7 +6,7 @@ const SvgBase = {
 		id: {type: String, default: function(){return this.getUid()}},
 		x: {default: 0}, 
 		y: {default: 0}, 
-		width: {default: 100}, 
+		width: {default: 120}, 
 		height: {default: 100}
 	},
 	
@@ -64,28 +64,25 @@ const NodeDraggable = {
 
 		dragMouseDown(evt) {
 
-			const svg = evt.currentTarget.parentNode.closest("svg");
-			const point = svg.createSVGPoint();
-			const transform = svg.getScreenCTM().inverse();
+			const svg = evt.currentTarget.parentNode.closest("svg")
+			, transform = svg.getScreenCTM().inverse();
 			
 			var getPosss = function(mouseEvent, point) {
 				point.x = (mouseEvent.clientX);
 				point.y = (mouseEvent.clientY);
 			}
-			
-			var svgDropPoint;
+			var point = svg.createSVGPoint();
+			//var svgDropPoint = svg.createSVGPoint();
 			
 			const main_group_selector = svg.querySelector(".svg-pan-zoom_viewport");
 
 			var getPos = function(evt, point) {
-				svgDropPoint = svg.createSVGPoint();
+				point.x = evt.clientX;
+				point.y = evt.clientY;
 
-				svgDropPoint.x = evt.clientX;
-				svgDropPoint.y = evt.clientY;
-
-				svgDropPoint = svgDropPoint.matrixTransform(main_group_selector.getCTM().inverse());
-				point.x = svgDropPoint.x;
-				point.y = svgDropPoint.y;
+				point = point.matrixTransform(main_group_selector.getCTM().inverse());
+				//point.x = svgDropPoint.x;
+				//point.y = svgDropPoint.y;
 			}
 			
 			var newPt
@@ -347,9 +344,9 @@ const PinComponent = {
 	},
 	
 	watch: {
-		mWidth: function(){this.$parent.$emit('resize')},
+		mWidth: function(){console.log('watch');this.$emit('resizee')},
 		mHeight: function(){this.$emit('resize')},
-		mLabel: function(){this.update();},
+		label: function(){this.update();},
 	},
 	
 	mounted: function(){
@@ -358,8 +355,13 @@ const PinComponent = {
 	
 	methods: {
 		update: function(){
-			var textBox = this.$el.querySelector('text.label').getBBox()
+			console.log('start resize');
+			var text = this.$el.querySelector('text.label')
+			, textBox
 			, oldWidth = this.mWidth;
+			
+			this.mWidth = 400;
+			textBox = text.getBBox();
 			
 			if( (textBox.x + textBox.width + 10) != oldWidth)
 				this.mWidth = textBox.x + textBox.width + 10;
@@ -368,8 +370,13 @@ const PinComponent = {
 		startLink: function(){console.log('startLink')},
 		stopLink: function(){console.log('stopLink')},
 		
-		mouseEnter: function(){console.log('mouseEnter')},
+		//mouseEnter: function(){console.log('mouseEnter')},
 		mouseLeave: function(){console.log('mouseLeave')},
+		
+		Emit: function(){
+			console.log('emit', this.$parent);
+			this.$emit('merdeenter');
+		}
 	},
 	
 	template: "#expinTpl"
