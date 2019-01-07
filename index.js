@@ -92,9 +92,6 @@ var WorksheetGrid = {
 }
 
 
-
-var lastPageCoords = {x: 0, y: 0}
-
 var worksheetComponent = {
 	inject: ['getUid'],
 	mixins: [WorksheetGrid],
@@ -218,7 +215,7 @@ Vue.component('ex-titlebarbutton', titlebarButtonComponent);
 var titleBarComponent = {
 	inject: ['getUid'],
 
-	mixins: [],
+	mixins: [SvgBase],
 	
 	provide: {
 		getTitleButtonPos: function(){return Math.floor(Math.random() * Math.floor(500));}

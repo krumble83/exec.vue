@@ -64,23 +64,9 @@
 					<slot name="selection" />
 				</g>
 			</g>
-			<slot name="footer" />
+			<ex-tooltip />
+			<slot name="front" />
 		</svg>
-	</template>
-
-	
-	<template id="titlebarTpl">
-		<g class="exTitlebar" id="titlebar">
-			<rect width="100%" height="40"></rect>
-			<text :x="100" y="25" stroke="#fff">
-				<tspan>{{title}}</tspan>
-			</text>
-			<slot></slot>
-		</g>
-	</template>
-	
-	<template id="titlebarButtonTpl">
-		<image width="32" height="32" :x="getTitleButtonPos()" y="3" class="undoredo undo"></image>
 	</template>
 	
 	<template id="exnodeTpl">
@@ -91,23 +77,21 @@
 				:y.sync="mY" 
 				:width="mWidth" 
 				:height="mWidth" 
-				:title.sync="mTitle"
-				:subtitle="mSubtitle"
-				:type="mType"
-				:flags="mFlags"
-				:img="mImg"
-				:color= "mColor"
+				:type="type"
+				inputs=""
+				outputs=""
 				@mousedown.left.stop="dragMouseDown" 
 				@contextmenu.prevent.stop="alertz" 
+				@resize="updatez"
 			>
 				<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
-				<path v-if="mTitle && mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 3) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
-				<path v-if="mTitle && !mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 3) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
 				
-				<image v-if="img" :href="img" x="10" y="6" width="16" height="16" />
-				<g class="title" :transform="img ? 'translate(20,0)' : ''">
-					<text v-if="mTitle" class="exNodeTitle" x="10" y="18">{{mTitle}}</text>
-					<text v-if="mSubtitle" class="exNodeSubtitle" x="10" y="34">{{mSubtitle}}</text>
+				<g class="exNodeHeader">
+					<path v-if="mTitle && mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 3) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
+					<path v-if="mTitle && !mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 3) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
+					<image v-if="img" :href="img" x="10" y="6" width="16" height="16" />
+					<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="18">{{title}}</text>
+					<text v-if="subtitle" class="exNodeSubtitle" :x="img ? '28' : 10" y="34">{{subtitle}}</text>
 				</g>
 				
 				<g class="exInputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
@@ -121,10 +105,11 @@
 						:y="idx*24" 
 						:width="pin.width"
 						:height="pin.height"
-						:color="pin.color"						
+						:color="pin.color"
 					/>
 					<slot name="inputs" />
 				</g>
+				
 				<g class="exOutputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
 					<component v-for="(pin, idx) in mOutputs" :key="pin.id" 
 						:is="pin.ctor" 
@@ -143,6 +128,11 @@
 			</svg>
 	</template>
 	
+	<template id="expingraphTpl">
+		<circle cx="8" :cy="mHeight/2" r="5" :stroke="color" />
+		<text x="20" y="12" class="label">{{label}}</text>	
+	</template>
+	
 	<template id="expinTpl">
 		<svg 
 			:id="mId"
@@ -151,29 +141,56 @@
 			:y="mY" 
 			:width="mWidth" 
 			:height="mHeight" 
-			:label="mLabel"
-			:type="mType"
-			:color="mColor"
 			@mousedown.left.stop="$emit('startLink')"
 			@mouseup.left="$emit('stopLink')"
+			@mouseenter="mouseEnter"
 		>
 			<rect x="0" y="0" :width="mWidth" :height="mHeight" />
-			<template v-if="mType == 'input'">
-				<circle cx="8" :cy="mHeight/2" r="5" :stroke="mColor" />
-				<text x="20" y="12" class="label">{{mLabel}}</text>
+			<template v-if="type == 'input'">
+				<circle cx="8" :cy="mHeight/2" r="5" :stroke="color" />
+				<text x="20" y="12" class="label">{{label}}</text>
 			</template>
+			<template v-else></template>
 		</svg>
 	</template>
 	
+	<template id="extooltipTpl">
+		<svg
+			:x="0"
+			:y="0"
+			:width="100"
+			:height="100"
+			:class="classObject"
+		>
+			<rect width="100%" height="100%" class="extooltip" fill="#555" />
+			<text x="3" y="3">{{text}}</text>
+		</svg>
+	</template>
+	
+	
+	<template id="titlebarTpl">
+		<g class="exTitlebar">
+			<rect width="100%" height="40"></rect>
+			<text x="100" y="25" stroke="#fff">
+				<tspan>{{title}}</tspan>
+			</text>
+			<slot name="buttons" />
+		</g>
+	</template>
+	
+	<template id="titlebarButtonTpl">
+		<image width="32" height="32" x="100" y="3" class="undoredo undo" />
+	</template>
+
+
 	<div id="app">
-		<ex-worksheet id="toto" ref="worksheet" class="exWorksheet" preserveAspectRatio="xMidYMin slice">
-			<ex-titlebar title="toto" ref="titlebar">
-				<ex-titlebarbutton href="undo.png" ref="btn_undo" />
-				<ex-titlebarbutton href="undo.png" ref="btn_undo" />
+		<ex-worksheet ref="worksheet" class="exWorksheet">
+			<ex-titlebar title="toto" slot="front">
+				<image width="32" href="undo.png" height="32" x="100" y="3" class="undoredo undo" slot="buttons"></image>
 			</ex-titlebar>
-			<component is="use" xlink:href="#titlebar" slot="footer" />
 		</ex-worksheet>
 	</div>
+	
 	<script src="node.js"></script>
 	<script src="panzoom.js"></script>
 	<script src="index.js"></script>
@@ -207,7 +224,8 @@
 			],
 			flags: 'ok',
 		};
-		app.addNode(n);		
+		app.addNode(n);
+		n.inputs[1].label = "yes"
 		console.log(n)
 	</script>
 	</body>

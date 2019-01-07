@@ -9,7 +9,10 @@ var Utils = {
 		}
 	},
 	Template: {
-		addProperty: function(tpl, name, value){
+		addProperty: function(tplId, targetSelector, pname, pvalue){
+			var tpl = document.querySelector('#' + tlpId).content;
+			var target = tpl.querySelector(targetSelector);
+			target.setAttribute(pname, pvalue);
 			
 		}
 	},

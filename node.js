@@ -27,25 +27,12 @@ const SvgBase = {
 const NodeSelectable = {
 	data (){
 		return {
-			selected: false,
+			classObject: {
+				selected: false,
+			}
 		}
 	},
 	methods: {
-		selectMouseDown(e) {
-			this.oPos = {
-				x: e.pageX,
-				y: e.pageY
-			};
-			document.addEventListener("mousemove", this.dragMouseMove);
-			document.addEventListener("mouseup", this.dragMouseUp);
-		},
-	
-		selectMouseUp() {
-			document.removeEventListener("mousemove", this.dragMouseMove);
-			this.oPos = {};
-		},
-	
-		test(){console.log('ff')}
 	},
 }
 
@@ -54,8 +41,10 @@ const NodeDraggable = {
 	
 	mounted: function(){
 		//console.log('mounted')
-		this.mX = this.getGridPosition(this.mX);
-		this.mY = this.getGridPosition(this.mY);			
+		if(this.getGridPosition){
+			this.mX = this.getGridPosition(this.mX);
+			this.mY = this.getGridPosition(this.mY);			
+		}
 	},
 	
 	created: function(){
@@ -108,7 +97,8 @@ const NodeDraggable = {
 			offset.y -= this.mY + 10;
 			
 			const updateFn = () => {
-				if (this.classObject.dragging) requestAnimationFrame(updateFn);
+				if (this.classObject.dragging) 
+					requestAnimationFrame(updateFn);
 
 				newPt = point.matrixTransform(transform);
 				
@@ -120,21 +110,29 @@ const NodeDraggable = {
 					this.mX = newPt.x - offset.x;
 					this.mY = newPt.y - offset.y;
 				}
+				//this.$emit('dragmove', {x: this.mX, y: this.mY});
 			}
-			const moveFn = (evt) => getPos(evt, point);
+			
+			const moveFn = (evt) => {
+				getPos(evt, point);
+				this.$emit('dragmove', evt);
+			}
+			
 			const stopFn = (evt) => {
 				this.classObject.dragging = false;
-				svg.removeEventListener("mousemove", moveFn);
-				svg.removeEventListener("mouseup", stopFn);
+				svg.removeEventListener('mousemove', moveFn);
+				svg.removeEventListener('mouseup', stopFn);
+				this.$emit('dragend', evt);
 			}
 
 			requestAnimationFrame(updateFn);
 			moveFn(evt);
 
-			this.classObject.dragging = true;
 			this.$el.parentNode.append(this.$el);
+			this.classObject.dragging = true;
 			svg.addEventListener('mousemove', moveFn);
 			svg.addEventListener('mouseup', stopFn);
+			this.$emit('dragstart', evt);
 		},
 	}
 }
@@ -226,15 +224,24 @@ const NodeComponent = {
 	},
 	
 	watch: {
+		mWidth: function(){this.$emit('resize')},
+		mHeight: function(){this.$emit('resize')},
+
 		mTitle: function(){this.update()},
 		mSubtitle: function(){this.update()},
+		mInputs: function(){this.update()},
+		mOutputs: function(){this.update()},
 	},
 	
 	updated: function(){
 	},
 
 	created: function(){
-		console.log(this.$data);
+		//console.log(this.$data);
+	},
+	
+	on: {
+		//resize: function(){console.log('resize')},
 	},
 	
 	mounted: function(){
@@ -242,34 +249,39 @@ const NodeComponent = {
 	},
 	
 	methods: {
+		
+		updatez: function(){console.log('resize11111')},
+		
 		update: function(){
-			var me = this
-			, oldSize = {w: this.mWidth, h: this.mHeight}
-
-			var maxWidth = 100
-			, tr = Utils.Svg.getTranslate(me.$el.querySelector('g.title').getAttribute('transform'))
-			, el;
+			var oldSize = {w: this.mWidth, h: this.mHeight}
+			, maxWidth = 100
+			, headBox = this.$el.querySelector('g.exNodeHeader').getBBox()
+			, inputs = this.$el.querySelector('g.exInputs')
+			, outputs = this.$el.querySelector('g.exOutputs')
+			, inputsBox
+			, outputsBox;
 			
-			if(me.mTitle){
-				el = me.$el.querySelector('text.exNodeTitle');
-				maxWidth = Math.max(maxWidth, el.getComputedTextLength() + el.x.baseVal[0].value + tr.x + 20);
-				//console.log(el.getComputedTextLength(), el.x.baseVal[0].value, tr.x);
-			}
-			if(me.mSubtitle){
-				el = me.$el.querySelector('text.exNodeSubtitle');
-				maxWidth = Math.max(maxWidth, el.getComputedTextLength() + el.x.baseVal[0].value + tr.x + 20);
-			}
-			//console.log(maxWidth);
+			// inputs
+			inputs.setAttribute('transform', 'translate(7, ' + (headBox.y + headBox.height + 10) + ')');
+			
+			//outputs
+			inputsBox = inputs.getBBox();
+			outputs.setAttribute('transform', 'translate(' + (inputsBox.x + inputsBox.width + 10) + ', ' + (headBox.y + headBox.height + 10) + ')');
+			
+			//head
+			outputsBox = outputs.getBBox();
+			maxWidth = Math.max(maxWidth, headBox.width + headBox.x + 20, inputsBox.x + inputsBox.width + 10 + outputsBox.width);
+			
 			if(maxWidth != oldSize.w){
-				me.mWidth = maxWidth;
-				me.$emit('resize');
+				this.mWidth = maxWidth;
+				//this.$emit('resize');
 			}
-			console.log(this.$el.querySelector('.exInputs').getBBox());
+			//console.log(this.$el.querySelector('.exInputs').getBBox());
 
 		},
 		
-		addInput: function(){
-			
+		addInput: function(data){
+			this.mInputs.push(data);
 		},
 		
 		alertz: function(){
@@ -303,7 +315,10 @@ const PinComponent = {
 		type: String,
 		flags: String,
 		color: {default: '#00f'},
+		
+		optionnal: Boolean,
 		isarray: Boolean,
+		groupe: {type: String},
 	},
 	
 	data () {
@@ -316,6 +331,9 @@ const PinComponent = {
 	},
 	
 	watch: {
+		mWidth: function(){this.$parent.$emit('resize')},
+		mHeight: function(){this.$emit('resize')},
+		mLabel: function(){this.update();},
 	},
 	
 	mounted: function(){
@@ -324,15 +342,18 @@ const PinComponent = {
 	
 	methods: {
 		update: function(){
-			var me = this;
-			setTimeout(function(){
-				me.mWidth = 100;
-				//me.$el.setAttribute('width', '100');
-			}, 100);
+			var textBox = this.$el.querySelector('text.label').getBBox()
+			, oldWidth = this.mWidth;
+			
+			if( (textBox.x + textBox.width + 10) != oldWidth)
+				this.mWidth = textBox.x + textBox.width + 10;
 		},
 		
 		startLink: function(){console.log('startLink')},
-		stopLink: function(){console.log('stopLink')}
+		stopLink: function(){console.log('stopLink')},
+		
+		mouseEnter: function(){console.log('mouseEnter')},
+		mouseLeave: function(){console.log('mouseLeave')},
 	},
 	
 	template: "#expinTpl"
@@ -340,3 +361,25 @@ const PinComponent = {
 Vue.component('ex-pin', PinComponent);
 
 
+
+const TooltipComponent = {
+	mixins: [SvgBase],
+	props: {
+		text: {}
+	},
+	
+	data: function(){
+		return {
+			classObject: {
+				hidden: true,
+			}
+		}
+	},
+
+	methods: {
+
+	},
+	
+	template: "#extooltipTpl"
+};
+Vue.component('ex-tooltip', TooltipComponent);
