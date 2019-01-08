@@ -228,24 +228,18 @@ var worksheetComponent = {
 	methods: {
 		addNode: function(data){
 			//console.log(this._provided);
-			if(typeof data.ctor !== 'String')
-				data.ctor = 'ex-node';
 
 			if(typeof data.id !== 'String')
 				data.id = this.getUid();
 
 			if(data.inputs){
 				Array.from(data.inputs).forEach(function (el, i) {
-					if(typeof el.ctor !== 'String')
-						data.inputs[i].ctor = 'ex-pin';
-					data.inputs[i].type="input";
+					data.inputs[i].type = 'input';
 				});
 			}
 			if(data.outputs){
 				Array.from(data.outputs).forEach(function (el, i) {
-					if(typeof el.ctor !== 'String')
-						data.outputs[i].ctor = 'ex-pin';
-					data.inputs[i].type="output";
+					data.outputs[i].type = 'output';
 				});
 			}
 			this.nodes.push(data);
@@ -261,7 +255,6 @@ var worksheetComponent = {
 		addDef: function(data){
 			var me = this;
 			
-			//console.log(data);
 			
 			if(Array.isArray(data)){
 				data.forEach(function(el){
@@ -269,10 +262,11 @@ var worksheetComponent = {
 				});
 				return;
 			}
-			
+			//console.log(this.defs);
 			if(data.id) {
 				var found = false;
 				this.defs.foreach(function(elem){
+					//console.log(elem.id, data.id);
 					if(elem.id == data.id)
 						found = true;
 				});
@@ -284,6 +278,10 @@ var worksheetComponent = {
 			
 			this.defs.push(data);
 			return data.id;
+		},
+		
+		getSvgCoord: function(evt, point){
+			
 		},
 		
 		onContextMenu: function(){
@@ -307,6 +305,7 @@ var worksheetComponent = {
 				y: (evt.clientY - CTM.f) / CTM.d
 			};
 		},
+		addSvgDef: function(data){this.addDef(data)},
 	},
 	
 
@@ -367,7 +366,7 @@ var titleBarComponent = {
 Vue.component('ex-titlebar', titleBarComponent);
 
 
-
+Vue.prototype.$eventBus = new Vue()
 var app = new Vue({
 	provide: {
 		getUid: function(prefix){return 'svg' + ((prefix) ? prefix : '') + id++;}, 

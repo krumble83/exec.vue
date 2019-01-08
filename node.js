@@ -6,7 +6,7 @@ const SvgBase = {
 		id: {type: String, default: function(){return this.getUid()}},
 		x: {default: 0}, 
 		y: {default: 0}, 
-		width: {default: 120}, 
+		width: {default: 50}, 
 		height: {default: 100}
 	},
 	
@@ -23,12 +23,19 @@ const SvgBase = {
 
 
 const NodeSelectable = {
-	data (){
+
+	data: function(){
 		return {
 			classObject: {
-				selected: false,
-			}
+				dragging: false,
+			}		
 		}
+	},
+	
+	created: function(){
+		this.$eventBus.$on('nodedrag.dragmove', function(){
+			console.log('zz');
+		});
 	},
 	
 	methods: {
@@ -56,7 +63,7 @@ const NodeDraggable = {
 		return {
 			classObject: {
 				dragging: false,
-			}
+			}		
 		}
 	},
 	
@@ -81,8 +88,6 @@ const NodeDraggable = {
 				point.y = evt.clientY;
 
 				point = point.matrixTransform(main_group_selector.getCTM().inverse());
-				//point.x = svgDropPoint.x;
-				//point.y = svgDropPoint.y;
 			}
 			
 			var newPt
@@ -112,14 +117,14 @@ const NodeDraggable = {
 			
 			const moveFn = (evt) => {
 				getPos(evt, point);
-				this.$emit('dragmove', evt);
+				this.$eventBus.$emit('nodedrag.dragmove', evt);
 			}
 			
 			const stopFn = (evt) => {
 				this.classObject.dragging = false;
 				svg.removeEventListener('mousemove', moveFn);
 				svg.removeEventListener('mouseup', stopFn);
-				this.$emit('dragend', evt);
+				this.$eventBus.$emit('nodedrag.dragend', evt);
 			}
 
 			requestAnimationFrame(updateFn);
@@ -129,13 +134,13 @@ const NodeDraggable = {
 			this.classObject.dragging = true;
 			svg.addEventListener('mousemove', moveFn);
 			svg.addEventListener('mouseup', stopFn);
-			this.$emit('dragstart', evt);
+			this.$eventBus.$emit('nodedrag.dragstart', evt);
 		},
 	}
 }
 
 const NodeComponent = {
-	mixins: [SvgBase, NodeDraggable],
+	mixins: [SvgBase, NodeDraggable, NodeSelectable],
 		
 	props: {
 		title: String, 
@@ -250,6 +255,7 @@ const NodeComponent = {
 		updatez: function(){console.log('resize11111')},
 		
 		update: function(){
+			//console.log('Node: Start resize ' + this.mTitle);
 			var oldSize = {w: this.mWidth, h: this.mHeight}
 			, maxWidth = 100
 			, headBox = this.$el.querySelector('g.exNodeHeader').getBBox()
@@ -263,28 +269,25 @@ const NodeComponent = {
 			
 			//outputs
 			inputsBox = inputs.getBBox();
-			outputs.setAttribute('transform', 'translate(' + (inputsBox.x + inputsBox.width + 10) + ', ' + (headBox.y + headBox.height + 10) + ')');
+			outputsBox = outputs.getBBox();
+
+			outputs.setAttribute('transform', 'translate(' + (inputsBox.x + inputsBox.width + 9 + outputsBox.width) + ', ' + (headBox.y + headBox.height + 10) + ')');
 			
 			//head
-			outputsBox = outputs.getBBox();
-			maxWidth = Math.max(maxWidth, headBox.width + headBox.x + 20, inputsBox.x + inputsBox.width + 10 + outputsBox.width);
+			maxWidth = Math.max(maxWidth, headBox.width + headBox.x + 20, inputsBox.x + inputsBox.width + 9 + outputsBox.width);
 			
 			if(maxWidth != oldSize.w){
 				this.mWidth = maxWidth;
 				//this.$emit('resize');
 			}
-			//console.log(this.$el.querySelector('.exInputs').getBBox());
-
+			console.log(inputsBox, outputsBox);
 		},
 		
 		addInput: function(data){
 			this.mInputs.push(data);
 		},
 		
-		alertz: function(){
-			console.log('zz');
-			alert('');
-		}
+		contextMenu: function(){console.log('Node:Context menu');}
 	},
 	
 	template: "#exnodeTpl"
@@ -298,18 +301,19 @@ Vue.component('ex-node', NodeComponent);
 
 
 const PinLink = {
-	data (){
+	data: function(){
 		return {
 			classObject: {
 				linked: false,
 			},
-			on : {
-				update: function(){
-					console.log('alert');
-				}
-			}
 		}
 	},
+	
+	methods: {
+		mouseEnter: function(evt){
+			console.log('coucou');
+		}
+	}
 }
 
 const PinForeignEditor = {
@@ -319,9 +323,11 @@ const PinForeignEditor = {
 }
 
 const PinComponent = {
+	inject: ['addSvgDef'],
 	mixins: [SvgBase, PinLink, PinForeignEditor],
 	props: {
-		height: {default: 16},
+
+		height: {default: 20},
 		ctor: {default: 'ex-pin'},
 		label: String, 
 		type: String,
@@ -334,8 +340,50 @@ const PinComponent = {
 		editor: false,
 	},
 	
-	data () {
+	data: function() {
+		var me = this
+		, def = {
+			//<linearGradient id="pinFocus_ffffff">
+				//<stop id="SvgjsStop1065" stop-opacity="0.01" stop-color="#ffffff" offset="0.1"></stop>
+				//<stop id="SvgjsStop1066" stop-opacity="0.4" stop-color="#ffffff" offset="0.3">
+				//</stop><stop id="SvgjsStop1067" stop-opacity="0.01" stop-color="#ffffff" offset="1"></stop></linearGradient>
+			props: {
+				is: 'linearGradient',
+				id: 'pinFocus_' + this.color.replace('#', '')
+			},
+			childs: [{
+				props : {
+					is: 'stop',
+					'stop-color': this.color,
+					'stop-opacity': '0.01',
+					offset: '0.1'
+				}
+			},
+			{
+				props: {
+					is: 'stop',
+					'stop-color': this.color,
+					'stop-opacity': '0.4',
+					offset: '0.3'
+				}
+			},
+			{
+				props: {
+					is: 'stop',
+					'stop-color': this.color,
+					'stop-opacity': '0.01',
+					offset: '1'
+				}
+			}]			
+		};
+		
+		//console.log(this.$refs);
+		this.$parent.$parent.addDef(def);
+		
 		return {
+			classObject: {
+				linkable: true,
+			},
 			mLabel: this.label,
 			mType: this.type,
 			mColor: this.color,
@@ -344,18 +392,31 @@ const PinComponent = {
 	},
 	
 	watch: {
-		mWidth: function(){console.log('watch');this.$emit('resizee')},
+		mWidth: function(){this.$emit('resizee')},
 		mHeight: function(){this.$emit('resize')},
-		label: function(){this.update();},
+		label: function(){
+			var me = this;
+				Vue.nextTick(function () {
+					me.update();
+				})
+		},
 	},
 	
 	mounted: function(){
 		this.update();
 	},
 	
+	computed: {
+		
+		center: function(){
+			return {x:0, y:0 }
+		},
+		
+	},
+	
 	methods: {
 		update: function(){
-			console.log('start resize');
+			console.log('Pin:start resize ' + this.mLabel);
 			var text = this.$el.querySelector('text.label')
 			, textBox
 			, oldWidth = this.mWidth;
@@ -363,12 +424,28 @@ const PinComponent = {
 			this.mWidth = 400;
 			textBox = text.getBBox();
 			
-			if( (textBox.x + textBox.width + 10) != oldWidth)
-				this.mWidth = textBox.x + textBox.width + 10;
+			if( (parseInt(text.getAttribute('x')) + textBox.width + 3) != oldWidth)
+				this.mWidth = parseInt(text.getAttribute('x')) + textBox.width + 3;
+			else
+				this.mWidth = oldWidth;
+		},
+		
+		isInput: function(){
+			return this.mType == 'input';
+		},
+		
+		isOutput: function(){
+			return this.mType == 'output';			
+		},
+		
+		getType: function(){
+			return this.mType;
 		},
 		
 		startLink: function(){console.log('startLink')},
 		stopLink: function(){console.log('stopLink')},
+		
+		contextMenu: function(){console.log('Pin:context menu')},
 		
 		//mouseEnter: function(){console.log('mouseEnter')},
 		mouseLeave: function(){console.log('mouseLeave')},
@@ -397,7 +474,7 @@ const TooltipComponent = {
 		return {
 			classObject: {
 				hidden: true,
-			}
+			},
 		}
 	},
 
