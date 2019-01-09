@@ -1,29 +1,28 @@
 <template id="expinTpl">
 	<svg 
 		:id="mId"
-		class="exPin"
+		:class="classObject"
 		:x="mX" 
 		:y="mY" 
 		:width="mWidth" 
 		:height="mHeight" 
 		:label="mLabel"
-		@mousedown.left.stop="$emit('startLink')"
+		@mousedown.left.stop="$emit('link-start', $event)"
 		@mouseup.left="$emit('stopLink')"
 		@mouseenter="mouseEnter"
-		@resize="$parent.$emit('pin.resize')"
 		@contextmenu.stop.prevent="contextMenu"
-		overflow="visible"
+		:overflow="mType=='output' ? 'visible' : ''"
 	>
 		<rect :transform="mType=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus_' + mColor.replace('#', '') + ')'" />
 		<template v-if="type == 'input'">
-			<circle cx="14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" />
-			<text x="26" y="14" class="label">{{label}}</text>
+			<circle cx="14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
+			<text x="26" y="14" class="label" ref="label">{{label}}</text>
 		</template>
 		<template v-else>
-			<circle cx="-14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" />
-			<text x="19" y="14" transform="translate(-47)" text-anchor="end" class="label">{{label}}</text>
+			<circle cx="-14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
+			<text x="19" y="14" transform="translate(-47)" text-anchor="end" class="label" ref="label">{{label}}</text>
 		</template>
-		<component v-if="mEditor"
+		<component v-if="mEditor && classObject.linked==false" 
 			:is="mEditor.ctor"
 			
 		/>
@@ -76,10 +75,6 @@
 		data: function() {
 			var me = this
 			, def = {
-				//<linearGradient id="pinFocus_ffffff">
-					//<stop id="SvgjsStop1065" stop-opacity="0.01" stop-color="#ffffff" offset="0.1"></stop>
-					//<stop id="SvgjsStop1066" stop-opacity="0.4" stop-color="#ffffff" offset="0.3">
-					//</stop><stop id="SvgjsStop1067" stop-opacity="0.01" stop-color="#ffffff" offset="1"></stop></linearGradient>
 				props: {
 					is: 'linearGradient',
 					id: 'pinFocus_' + this.color.replace('#', '')
@@ -109,25 +104,24 @@
 					}
 				}]			
 			};
-			
-			//console.log(this.$refs);
 			this.$parent.$parent.addDef(def);
 			
 			return {
 				classObject: {
+					exPin: true,
 					linkable: true,
+					linked: false,
 				},
 				mLabel: this.label,
 				mType: this.type,
 				mColor: this.color,
 				mFlags: this.flags,
-				mEditor: false,
+				mEditor: this.editor,
 			}
 		},
 		
 		watch: {
-			mWidth: function(){this.$emit('resize')},
-			mHeight: function(){this.$emit('pin.resize')},
+
 			label: function(){
 				var me = this;
 					Vue.nextTick(function () {
@@ -150,16 +144,29 @@
 		
 		methods: {
 			update: function(){
-				console.log('Pin:start resize ' + this.mLabel);
-				var text = this.$el.querySelector('text.label')
+				//console.log('Pin:start resize ' + this.mLabel);
+				var me = this
+				, text = this.$refs.label
+				, editor = this.$el.querySelector('.exEditor')
+				, oldWidth = this.mWidth
 				, textBox
-				, oldWidth = this.mWidth;
+				, width
 				
 				this.mWidth = 400;
 				textBox = text.getBBox();
 				
-				if( (parseInt(text.getAttribute('x')) + textBox.width + 11) != oldWidth)
-					this.mWidth = parseInt(text.getAttribute('x')) + textBox.width + 11;
+				width = parseInt(text.getAttribute('x')) + textBox.width + 11;
+				if(editor){
+					editor.setAttribute('x', width);
+					width += parseInt(editor.getAttribute('width')) + 2;
+				}
+				
+				if( (width) != oldWidth){
+					this.mWidth = width;
+					this.$nextTick(function(){
+						me.$emit('pin-resize');
+					});
+				}
 				else
 					this.mWidth = oldWidth;
 			},
@@ -175,19 +182,13 @@
 			getType: function(){
 				return this.mType;
 			},
-			
-			startLink: function(){console.log('startLink')},
-			stopLink: function(){console.log('stopLink')},
-			
+						
 			contextMenu: function(){console.log('Pin:context menu')},
 			
 			//mouseEnter: function(){console.log('mouseEnter')},
 			mouseLeave: function(){console.log('mouseLeave')},
 			
-			Emit: function(){
-				console.log('emit', this.$parent);
-				this.$emit('merdeenter');
-			}
+
 		},
 		
 		template: "#expinTpl"

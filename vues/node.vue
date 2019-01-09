@@ -9,20 +9,23 @@
 		:type="type"
 		inputs=""
 		outputs=""
+		overflow="visible"
 		@mousedown.left.stop="leftMouseDown($event)" 
 		@contextmenu.prevent.stop="contextMenu($event)"
 	>
 		<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
 		
-		<g class="exNodeHeader">
+		<g class="exNodeHeader" ref="header">
 			<path v-if="mTitle && mSubtitle" :d="'m2,12c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 4) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
 			<path v-if="mTitle && !mSubtitle" :d="'m2,11.5c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 4) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
 			<image v-if="img" :href="img" x="10" y="6" width="16" height="16" />
-			<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="19">{{mTitle}}</text>
-			<text v-if="subtitle" class="exNodeSubtitle" :x="img ? '28' : 10" y="34">{{mSubtitle}}</text>
+			<g>
+				<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="19">{{mTitle}}</text>
+				<text v-if="subtitle" class="exNodeSubtitle" :x="img ? '28' : 10" y="34">{{mSubtitle}}</text>
+			</g>
 		</g>
 		
-		<g class="exInputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
+		<g ref="inputs" class="exInputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
 			<component v-for="(pin, idx) in mInputs" :key="pin.id" 
 				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
 				slot="inputs" 
@@ -34,14 +37,17 @@
 				:width="pin.width"
 				:height="pin.height"
 				:color="pin.color"
+				:editor="pin.editor"
+				@pin-resize="$emit('pin-resize')"
+				
 			/>
 			<slot name="inputs" />
 		</g>
 		
-		<g class="exOutputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
+		<g ref="outputs" class="exOutputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
 			<component v-for="(pin, idx) in mOutputs" :key="pin.id" 
 				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
-				slot="inputs" 
+				slot="outputs" 
 				:class="pin.class"
 				:label="pin.label"
 				:type="pin.type"
@@ -50,6 +56,7 @@
 				:width="pin.width"
 				:height="pin.height"
 				:color="pin.color"
+				@pin-resize="$emit('pin-resize')"
 			/>				
 			<slot name="outputs" />
 		</g>
@@ -158,8 +165,9 @@
 		},
 
 		created: function(){
-			this.$on('pin.resize', function(){
-				console.log('rtrtrt');
+			var me = this;
+			this.$on('pin-resize', function(){
+				me.update();
 			});
 		},
 		
@@ -167,17 +175,14 @@
 			this.update();
 		},
 		
-		methods: {
-			
-			updatez: function(){console.log('resize11111')},
-			
+		methods: {			
 			update: function(){
 				//console.log('Node: Start resize ' + this.mTitle);
 				var oldSize = {w: this.mWidth, h: this.mHeight}
 				, maxWidth = 100
-				, headBox = this.$el.querySelector('g.exNodeHeader').getBBox()
-				, inputs = this.$el.querySelector('g.exInputs')
-				, outputs = this.$el.querySelector('g.exOutputs')
+				, headBox = this.$refs.header.querySelector('g').getBBox()
+				, inputs = this.$refs.inputs
+				, outputs = this.$refs.outputs
 				, inputsBox
 				, outputsBox;
 				
@@ -195,9 +200,10 @@
 				
 				if(maxWidth != oldSize.w){
 					this.mWidth = maxWidth;
-					//this.$emit('resize');
+					//console.log(inputsBox, outputsBox, headBox.width + headBox.x + 20);
+					this.$emit('node-resize');
 				}
-				console.log(inputsBox, outputsBox);
+				//console.log(inputsBox, outputsBox);
 			},
 			
 			addInput: function(data){

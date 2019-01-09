@@ -16,7 +16,7 @@
 
 
 .exWorksheet .exSelection .exNode > rect:first-child {
-	stroke-width: 4px;
+	stroke-width: 3px;
 	stroke: url(#selectionHandlerStroke);
 }
 

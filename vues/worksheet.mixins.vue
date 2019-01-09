@@ -109,7 +109,7 @@
 
 	});
 
-	var worksheetSelection = {
+	var WorksheetSelection = {
 		
 		created: function(){
 			var me = this;
@@ -189,7 +189,7 @@
 				const transform = svg.getScreenCTM().inverse();
 				
 				
-				var instance = new SelectionRectangle()	;		
+				var instance = new SelectionRectangle();
 				instance.$mount();
 				this.getViewport().appendChild(instance.$el);
 				

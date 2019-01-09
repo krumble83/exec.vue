@@ -66,7 +66,7 @@
 <script>
 
 	var worksheetComponent = {
-		mixins: [WorksheetGrid, worksheetSelection],
+		mixins: [WorksheetGrid, WorksheetSelection],
 		inject: ['getUid'],
 		
 		data: function(){

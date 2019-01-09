@@ -52,7 +52,8 @@
 				var point = this.getPoint()
 				, offset;
 				
-				this.getPoint(evt, point);			
+				
+				this.getPoint(evt, point);
 				
 				offset = {x: point.x, y: point.y}
 				offset.x -= this.mX + 12;

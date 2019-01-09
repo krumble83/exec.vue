@@ -13,7 +13,8 @@
 		el.focus()
 	  }
 	});
-	
+
+
 	Vue.prototype.$eventBus = new Vue();
 	
 	const SvgBase = {

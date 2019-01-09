@@ -59,7 +59,13 @@
 			x: 300,
 			y: 300,
 			inputs: [
-				{id: 'input1', label: 'ingfhfthrthfhfth', color:'#f00'},
+				{id: 'input1', 
+					label: 'editor', 
+					color:'#f00',
+					editor: {
+						ctor: 'ex-pineditor-input',
+					}
+				},
 				{id: 'input2', label: 'inu', color:'#0f0'},
 				//{id: 'zozo', label: 'cool', color:'#00f'}
 			],
@@ -84,7 +90,7 @@
 			flags: 'ok',
 		};
 
-		Utils.Vue.loadVue('common', 'worksheet.mixins', 'worksheet', 'node.mixins', 'node', 'pin.mixins', 'pin', 'pin.editors', 'link', 'app', function(){
+		Utils.Vue.loadVue('common', 'worksheet.mixins', 'link', 'worksheet', 'node.mixins', 'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
 			var app = new Vue({
 				provide: {
 					getUid: function(prefix){return 'svg' + ((prefix) ? prefix : '') + id++;}, 
@@ -106,7 +112,7 @@
 		
 		});
 
-		console.log(n)
+		console.dir(Vue)
 	</script>
 	</body>
 	
