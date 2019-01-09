@@ -18,6 +18,17 @@ const SvgBase = {
 			mHeight: this.height,
 			mWidth: this.width,
 		}
+	},
+	
+	methods: {
+		getWorksheet: function(){
+			return this.$parent.getWorksheet();
+		},
+		
+		getViewport: function(){
+			return this.$parent.getViewport();
+		}
+		
 	}
 }
 
@@ -27,15 +38,9 @@ const NodeSelectable = {
 	data: function(){
 		return {
 			classObject: {
-				dragging: false,
+				selected: false,
 			}		
 		}
-	},
-	
-	created: function(){
-		this.$eventBus.$on('nodedrag.dragmove', function(){
-			console.log('zz');
-		});
 	},
 	
 	methods: {
@@ -55,8 +60,11 @@ const NodeDraggable = {
 	},
 	
 	created: function(){
-		//console.log(this);
-		
+		var me = this;
+		this.$on('node.leftmousedown', function(evt){
+			//console.log(evt);
+			me.dragMouseDown(evt);
+		});		
 	},
 	
 	data: function(){
@@ -70,71 +78,68 @@ const NodeDraggable = {
 	methods: {
 
 		dragMouseDown(evt) {
+			
+			if(evt.defaultPrevented)
+				return;
 
 			const svg = evt.currentTarget.parentNode.closest("svg")
-			, transform = svg.getScreenCTM().inverse();
+			, viewport = this.getViewport();
 			
-			var getPosss = function(mouseEvent, point) {
-				point.x = (mouseEvent.clientX);
-				point.y = (mouseEvent.clientY);
-			}
-			var point = svg.createSVGPoint();
-			//var svgDropPoint = svg.createSVGPoint();
-			
-			const main_group_selector = svg.querySelector(".svg-pan-zoom_viewport");
-
-			var getPos = function(evt, point) {
+			var point = svg.createSVGPoint()
+			, offset
+			, getPos = function(evt, point) {
 				point.x = evt.clientX;
 				point.y = evt.clientY;
-
-				point = point.matrixTransform(main_group_selector.getCTM().inverse());
+				point = point.matrixTransform(viewport.getCTM().inverse());
 			}
 			
-			var newPt
-			, offset;
-			
 			getPos(evt, point);			
+			
 			offset = {x: point.x, y: point.y}
-			offset.x -= this.mX + 10;
-			offset.y -= this.mY + 10;
+			offset.x -= this.mX + 12;
+			offset.y -= this.mY + 12;
 			
 			const updateFn = () => {
 				if (this.classObject.dragging) 
 					requestAnimationFrame(updateFn);
-
-				newPt = point.matrixTransform(transform);
 				
 				if(this.getGridPosition){
-					this.mX = this.getGridPosition(newPt.x - offset.x);
-					this.mY = this.getGridPosition(newPt.y - offset.y);					
+					this.mX = this.getGridPosition(point.x - offset.x);
+					this.mY = this.getGridPosition(point.y - offset.y);					
 				}
 				else {
-					this.mX = newPt.x - offset.x;
-					this.mY = newPt.y - offset.y;
+					this.mX = point.x - offset.x;
+					this.mY = point.y - offset.y;
 				}
-				//this.$emit('dragmove', {x: this.mX, y: this.mY});
 			}
 			
 			const moveFn = (evt) => {
+				this.$eventBus.$emit('node.dragmove', this, evt);
+				this.$emit('node.dragmove', evt);
+				if(evt.defaultPrevented)
+					return;
 				getPos(evt, point);
-				this.$eventBus.$emit('nodedrag.dragmove', evt);
 			}
 			
 			const stopFn = (evt) => {
 				this.classObject.dragging = false;
-				svg.removeEventListener('mousemove', moveFn);
-				svg.removeEventListener('mouseup', stopFn);
-				this.$eventBus.$emit('nodedrag.dragend', evt);
+				document.removeEventListener('mousemove', moveFn);
+				document.removeEventListener('mouseup', stopFn);
+				
+				this.$eventBus.$emit('node.dragend', evt);
+				this.$emit('node.dragend', evt);
 			}
 
+			this.$eventBus.$emit('node.dragstart', evt);
+			this.$emit('node.dragstart', evt);
+			if(evt.defaultPrevented)
+				return;
+
+			this.classObject.dragging = true;
 			requestAnimationFrame(updateFn);
 			moveFn(evt);
-
-			this.$el.parentNode.append(this.$el);
-			this.classObject.dragging = true;
-			svg.addEventListener('mousemove', moveFn);
-			svg.addEventListener('mouseup', stopFn);
-			this.$eventBus.$emit('nodedrag.dragstart', evt);
+			document.addEventListener('mousemove', moveFn);
+			document.addEventListener('mouseup', stopFn);
 		},
 	}
 }
@@ -242,10 +247,6 @@ const NodeComponent = {
 		//console.log(this.$data);
 	},
 	
-	on: {
-		//resize: function(){console.log('resize')},
-	},
-	
 	mounted: function(){
 		this.update();
 	},
@@ -287,7 +288,12 @@ const NodeComponent = {
 			this.mInputs.push(data);
 		},
 		
-		contextMenu: function(){console.log('Node:Context menu');}
+		contextMenu: function(){console.log('Node:Context menu');},
+		
+		leftMouseDown: function(evt){
+			this.$eventBus.$emit('node.leftmousedown', this, evt);
+			this.$emit('node.leftmousedown', evt);
+		}
 	},
 	
 	template: "#exnodeTpl"
@@ -424,8 +430,8 @@ const PinComponent = {
 			this.mWidth = 400;
 			textBox = text.getBBox();
 			
-			if( (parseInt(text.getAttribute('x')) + textBox.width + 3) != oldWidth)
-				this.mWidth = parseInt(text.getAttribute('x')) + textBox.width + 3;
+			if( (parseInt(text.getAttribute('x')) + textBox.width + 11) != oldWidth)
+				this.mWidth = parseInt(text.getAttribute('x')) + textBox.width + 11;
 			else
 				this.mWidth = oldWidth;
 		},

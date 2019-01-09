@@ -20,9 +20,9 @@
 			:class="cls" 
 			xmlns="http://www.w3.org/2000/svg" 
 			ref="worksheet" 
-			@contextmenu.prevent.stop="onContextMenu" 
-			@mousedown.right="onRightButtonDown"
-			@mousedown.left.stop="startSelection"
+			@contextmenu.prevent.stop="onContextMenu($event)" 
+			@mousedown.right="onRightButtonDown($event)"
+			@mousedown.left.stop="onLeftMouseDown($event)"
 		>
 			<defs>
 				<template v-for="(def, idx) in defs">
@@ -36,7 +36,7 @@
 			<slot />
 
 			<rect width="100%" height="100%" class="background" />
-			<g class="exWorkspace">
+			<g class="exViewport">
 				<rect width="100000" height="100000" transform="translate(-50000,-50000)" :fill="'url(#' + gridId + ')'" />
 				<g class="exNodes">
 					<component v-for="node in nodes"
@@ -64,7 +64,7 @@
 				<g class="exSelection">
 					<slot name="selection" />
 				</g>
-				<slot name="workspace" />
+				<slot name="exViewport" />
 				<template v-for="(child, index) in workspace">
 					<component :is="child" :key="child.name"
 						:x="child.x" :y="child.y"
@@ -87,9 +87,8 @@
 				:type="type"
 				inputs=""
 				outputs=""
-				@mousedown.left.stop="dragMouseDown" 
-				@contextmenu.prevent.stop="contextMenu" 
-				@resize="updatez"
+				@mousedown.left.stop="leftMouseDown($event)" 
+				@contextmenu.prevent.stop="contextMenu($event)"
 			>
 				<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
 				
@@ -162,7 +161,7 @@
 			@contextmenu.stop.prevent="contextMenu"
 			overflow="visible"
 		>
-			<rect :transform="mType=='output' ? 'scale(-1,1) translate(-5)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus_' + mColor.replace('#', '') + ')'" />
+			<rect :transform="mType=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus_' + mColor.replace('#', '') + ')'" />
 			<template v-if="type == 'input'">
 				<circle cx="14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" />
 				<text x="26" y="14" class="label">{{label}}</text>
@@ -254,7 +253,7 @@
 			n.inputs[1].label = "yessssssssssss"
 		}, 3000);
 		
-		console.log(n)
+		console.dir(Vue)
 	</script>
 	</body>
 	

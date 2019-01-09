@@ -78,7 +78,7 @@ var WorksheetGrid = {
 	
 	mounted: function(){		
 		var panzoom = svgPanZoom(this.$el, {
-			viewportSelector: '.exWorkspace', 
+			viewportSelector: '.exViewport', 
 			fit: false, 
 			center: false,
 			zoomScaleSensitivity: 0.4,
@@ -92,7 +92,7 @@ var WorksheetGrid = {
 }
 
 
-let SelectionRectangle = {
+var SelectionRectangle = {
 	
 	template: `
 		<rect :x="mX" :y="mY" width="100" class="selection" height="100" />
@@ -110,7 +110,7 @@ let SelectionRectangle = {
 		}
 	},
   
-	data () {
+	data: function() {
 		return {
 			mX: this.x,
 			mY: this.y,
@@ -121,21 +121,94 @@ let SelectionRectangle = {
 
 var worksheetSelection = {
 	
+	created: function(){
+		var me = this;
+		
+		this.$eventBus.$on('node.leftmousedown', function(node, evt){
+			
+			if(!evt.ctrlKey)
+				me.unselectNode();
+			else if(me.isNodeSelected(node)){
+				me.unselectNode(node);
+				return;
+			}
+			me.selectNode(node);
+			
+			//evt.preventDefault();
+		});
+
+		this.$on('worksheet.leftmousedown', function(evt){
+			if(!evt.ctrlKey)
+				me.unselectNode();	
+			me.startSelection(evt);
+		});		
+
+		var def = {
+			//<linearGradient id="selectionHandlerStroke" x1="0" y1="0" x2="0" y2="1"><stop id="SvgjsStop1048" stop-color="#f1b000" offset="0"></stop><stop id="SvgjsStop1049" stop-color="#ce6d00" offset="1"></stop></linearGradient>
+			props: {
+				is: 'linearGradient',
+				id: 'selectionHandlerStroke',
+				x1: '0',
+				y1:'0',
+				x2: '0',
+				y2: '1'
+			},
+			childs: [{
+				props : {
+					is: 'stop',
+					'stop-color': '#f1b000',
+					offset: '0'
+				}
+			},
+			{
+				props: {
+					is: 'stop',
+					'stop-color': '#ce6d00',
+					offset: '1'
+				}
+			}]			
+		};
+		this.addDef(def);
+	},
+	
 	methods: {
+		
+		unselectNode: function(node){
+			var target = this.getWorksheet().$el.querySelector('.exNodes');
+			if(!node){
+				this.getWorksheet().$el.querySelector('.exSelection').querySelectorAll('.exNode').forEach(function(el){
+					target.appendChild(el);
+				});
+				return;
+			}
+			target.appendChild(node.$el);
+		},
+		
+		selectNode: function(node){
+			this.getWorksheet().$el.querySelector('.exSelection').appendChild(node.$el);
+		},
+		
+		isNodeSelected: function(node){
+			return node.$el.parentNode == this.getWorksheet().$el.querySelector('.exSelection')
+		},
+		
 		startSelection: function(evt){
-			
-			return;
-			
+			console.log(evt);
 			const svg = evt.currentTarget.closest("svg");
 			const point = svg.createSVGPoint();
 			const transform = svg.getScreenCTM().inverse();
 			
 			var getPosss = function(mouseEvent, point) {
-				point.x = (mouseEvent.clientX);
+				point.x = (mouseEvent.offsetX);
 				point.y = (mouseEvent.clientY);
 			}
 			
-			this.workspace.push(SelectionRectangle);
+			var ComponentClass = Vue.extend(SelectionRectangle);
+			var instance = new ComponentClass()	;		
+			instance.$mount();
+			this.getWorksheet().getViewport().appendChild(instance.$el);
+			
+			//this.workspace.push(SelectionRectangle);
 			var svgDropPoint;
 			
 			const main_group_selector = svg.querySelector(".svg-pan-zoom_viewport");
@@ -143,8 +216,8 @@ var worksheetSelection = {
 			var getPos = function(evt, point) {
 				svgDropPoint = svg.createSVGPoint();
 
-				svgDropPoint.x = evt.clientX;
-				svgDropPoint.y = evt.clientY;
+				svgDropPoint.x = evt.offsetX;
+				svgDropPoint.y = evt.offsetY;
 
 				svgDropPoint = svgDropPoint.matrixTransform(main_group_selector.getCTM().inverse());
 				point.x = svgDropPoint.x;
@@ -157,10 +230,10 @@ var worksheetSelection = {
 			getPos(evt, point);
 			oPos = {x: point.x, y: point.y};
 			
-			console.log(point.x);
+			//console.log(point.x);
 			//SelectionRectangle.methods.update(point.x, point.y);
-			SelectionRectangle.x = point.x;
-			SelectionRectangle.y = point.y;
+			instance.mX = point.x;
+			instance.mY = point.y;
 						
 			return;
 			
@@ -280,20 +353,48 @@ var worksheetComponent = {
 			return data.id;
 		},
 		
+		getWorksheet: function(){
+			return this;
+		},
+		
+		getViewport: function(){
+			return this.$el.querySelector(".svg-pan-zoom_viewport");
+		},
+
 		getSvgCoord: function(evt, point){
 			
 		},
 		
-		onContextMenu: function(){
+		onContextMenu: function(evt){
 			console.log('worksheet:onContextMenu');
+			this.$eventBus.$emit('worksheet.contextmenu', this, evt);
+			if(evt.defaultPrevented)
+				return;
+			this.$emit('worksheet.contextmenu', evt);
 		},
 		
-		onRightButtonDown: function(ev){
+		onRightButtonDown: function(evt){
 			console.log('worksheet:onRightButtonDown');
+			this.$eventBus.$emit('worksheet.rightbuttondown', this, evt);
+			if(evt.defaultPrevented)
+				return;
+			this.$emit('worksheet.rightbuttondown', evt);
 		},
 		
-		onRightButtonUp: function(ev){
+		onRightButtonUp: function(evt){
 			console.log('worksheet:onRightButtonUp');
+			this.$eventBus.$emit('worksheet.rightbuttonup', this, evt);
+			if(evt.defaultPrevented)
+				return;
+			this.$emit('worksheet.rightbuttonup', evt);
+		},
+		
+		onLeftMouseDown: function(evt){
+			console.log('worksheet:onLeftButtonDown');
+			this.$eventBus.$emit('worksheet.leftmousedown', this, evt);
+			this.$emit('worksheet.leftmousedown', evt);
+			if(evt.defaultPrevented)
+				return;
 		}
 	},
 
@@ -366,6 +467,7 @@ var titleBarComponent = {
 Vue.component('ex-titlebar', titleBarComponent);
 
 
+
 Vue.prototype.$eventBus = new Vue()
 var app = new Vue({
 	provide: {
@@ -380,3 +482,16 @@ var app = new Vue({
 	}
 });
 
+
+
+
+
+
+Vue.directive('focus', {
+  // Quand l'élément lié est inséré dans le DOM...
+  bind: function (el, zz, node) {
+	  console.log(node);
+    // L'élément prend le focus
+    el.focus()
+  }
+})
