@@ -264,3 +264,23 @@
 	}
 
 </script>
+
+<style>
+
+	.exWorksheet .medGrid{
+		stroke: #161616;
+		stroke-width: 1;
+	}
+
+	.exWorksheet .smallGrid{
+		stroke: #343434;
+		stroke-width: 1;
+		fill: #262626;
+	}
+
+	.exTitlebar text {
+		font-family: "Helvetica, Arial, sans-serif";
+	}
+	
+
+</style>

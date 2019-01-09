@@ -54,29 +54,7 @@
 	};
 	Vue.component('ex-tooltip', TooltipComponent);
 
-	const PinForeignEditor = {
-		props: {
-			editor: String,
-		}
-	}
 
-	const PinLink = {
-		data: function(){
-			return {
-				classObject: {
-					linked: false,
-				},
-			}
-		},
-		
-		methods: {
-			mouseEnter: function(evt){
-				console.log('coucou');
-			}
-		}
-	}
-	
-	
 	const PinComponent = {
 		inject: ['addSvgDef'],
 		mixins: [SvgBase, PinLink, PinForeignEditor],
@@ -221,3 +199,40 @@
 
 
 </script>
+
+<style>
+	.exWorksheet .exNode .exPin{
+		cursor: crosshair;
+	}
+
+	.exWorksheet .exNode .exPin.linkable{
+		pointer-events : all;
+		cursor: crosshair;
+	}
+
+	.exWorksheet .exNode.dragging .exPin{
+		pointer-events : none;
+	}
+
+
+	.exWorksheet .exNode .exPin > rect:first-child{
+		stroke-width: 0;
+		fill-opacity: 0;
+	}
+
+	.exWorksheet .exNode .exPin > rect:hover{
+		fill-opacity: 1;
+	}
+
+	.exWorksheet .exNode .exPin circle.pin{
+		stroke-width: 3px;
+		pointer-events : none;
+	}
+
+	.exWorksheet .exNode .exPin text.label{
+		stroke-width: 0;
+		font-size: 16px;
+		fill: #fff;
+		pointer-events : none;
+	}
+</style>

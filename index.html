@@ -1,178 +1,17 @@
 
 <html>
 	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="stylesheet" type="text/css" href="css.css" media="all">
 		<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 		<script src="libs/svg-pan-zoom.js"></script>
 		<script src="libs/color.js"></script>
 		<script src="utils.js"></script>
-		<script>
-			var test = new Color('#f00');
-			console.log(test);
-		</script>
 	</head>
 	
 	<body>
+	
 
-	<template id="worksheetTpl">
-		<svg 
-			style="width:100%;height:100%" 
-			:class="cls" 
-			xmlns="http://www.w3.org/2000/svg" 
-			ref="worksheet" 
-			@contextmenu.prevent.stop="onContextMenu($event)" 
-			@mousedown.right="onRightButtonDown($event)"
-			@mousedown.left.stop="onLeftMouseDown($event)"
-		>
-			<defs>
-				<template v-for="(def, idx) in defs">
-					<component v-bind="def.props">
-						<component v-for="(subdef, idx) in def.childs" v-bind="subdef.props" />
-					</component>
-				</template>
-				<slot name="defs" />
-			</defs>
-
-			<slot />
-
-			<rect width="100%" height="100%" class="background" />
-			<g class="exViewport">
-				<rect width="100000" height="100000" transform="translate(-50000,-50000)" :fill="'url(#' + gridId + ')'" />
-				<g class="exNodes">
-					<component v-for="node in nodes"
-						:is="node.ctor ? node.ctor : 'ex-node'" 
-						class="exNode"
-						:id="node.id"
-						:x.sync="node.x"
-						:y.sync="node.y"
-						:width="node.width"
-						:height="node.height"
-						:title.sync="node.title"
-						:subtitle="node.subtitle"
-						:type="node.type"
-						:flags="node.flags"
-						:color="node.color"
-						:img="node.img"
-						:inputs="node.inputs"
-						:outputs="node.outputs"
-					/>
-					<slot name="nodes" />
-				</g>
-				<g class="exLinks">
-					<slot name="links" />
-				</g>
-				<g class="exSelection">
-					<slot name="selection" />
-				</g>
-				<slot name="exViewport" />
-				<template v-for="(child, index) in workspace">
-					<component :is="child" :key="child.name"
-						:x="child.x" :y="child.y"
-					/>
-				</template>
-			</g>
-			<ex-tooltip />
-			<slot name="front" />
-		</svg>
-	</template>
-	
-	<template id="exnodeTpl">
-			<svg
-				:class="classObject"
-				:id="mId"
-				:x.sync="mX" 
-				:y.sync="mY" 
-				:width="mWidth" 
-				:height="mWidth" 
-				:type="type"
-				inputs=""
-				outputs=""
-				@mousedown.left.stop="leftMouseDown($event)" 
-				@contextmenu.prevent.stop="contextMenu($event)"
-			>
-				<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
-				
-				<g class="exNodeHeader">
-					<path v-if="mTitle && mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 3) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
-					<path v-if="mTitle && !mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 3) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
-					<image v-if="img" :href="img" x="10" y="6" width="16" height="16" />
-					<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="18">{{mTitle}}</text>
-					<text v-if="subtitle" class="exNodeSubtitle" :x="img ? '28' : 10" y="34">{{mSubtitle}}</text>
-				</g>
-				
-				<g class="exInputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
-					<component v-for="(pin, idx) in mInputs" :key="pin.id" 
-						:is="pin.ctor ? pin.ctor : 'ex-pin'" 
-						slot="inputs" 
-						:class="pin.class"
-						:label="pin.label"
-						:type="pin.type"
-						:x="0"
-						:y="idx*24" 
-						:width="pin.width"
-						:height="pin.height"
-						:color="pin.color"
-					/>
-					<slot name="inputs" />
-				</g>
-				
-				<g class="exOutputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
-					<component v-for="(pin, idx) in mOutputs" :key="pin.id" 
-						:is="pin.ctor ? pin.ctor : 'ex-pin'" 
-						slot="inputs" 
-						:class="pin.class"
-						:label="pin.label"
-						:type="pin.type"
-						:x="pin.x"
-						:y="idx*24" 
-						:width="pin.width"
-						:height="pin.height"
-						:color="pin.color"
-					/>				
-					<slot name="outputs" />
-				</g>
-			</svg>
-	</template>
-	
-	<template id="expingraphTpl">
-		<template v-if="type == 'input'">
-			<circle cx="14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" />
-			<text x="26" y="14" class="label">{{label}}</text>
-		</template>
-		<template v-else>
-			<circle cx="-10" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" />
-			<text x="26" y="13" transform="translate(-47)" text-anchor="end" class="label">{{label}}</text>
-		</template>
-	</template>
-	
-	<template id="expinTpl">
-		<svg 
-			:id="mId"
-			class="exPin"
-			:x="mX" 
-			:y="mY" 
-			:width="mWidth" 
-			:height="mHeight" 
-			:label="mLabel"
-			@mousedown.left.stop="$emit('startLink')"
-			@mouseup.left="$emit('stopLink')"
-			@mouseenter="mouseEnter"
-			@resize="$emit('resize')"
-			@contextmenu.stop.prevent="contextMenu"
-			overflow="visible"
-		>
-			<rect :transform="mType=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus_' + mColor.replace('#', '') + ')'" />
-			<template v-if="type == 'input'">
-				<circle cx="14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" />
-				<text x="26" y="14" class="label">{{label}}</text>
-			</template>
-			<template v-else>
-				<circle cx="-14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" />
-				<text x="19" y="14" transform="translate(-47)" text-anchor="end" class="label">{{label}}</text>
-			</template>
-		</svg>
-	</template>
-	
 	<template id="extooltipTpl">
 		<svg
 			:x="0"
@@ -210,11 +49,8 @@
 		</ex-worksheet>
 	</div>
 	
-	<script src="node.js"></script>
-	<script src="panzoom.js"></script>
-	<script src="index.js"></script>
 	<script>
-	
+		
 		var n = {
 			title: 'Make Array',
 			subtitle: 'target is me',
@@ -233,9 +69,8 @@
 			],
 			flags: 'ok',
 		};
-		app.addNode(n);
 		
-		n = {
+		var n2 = {
 			title: 'Split String long titre essai',
 			color: '#8000FF',
 			img: 'function.png',
@@ -248,12 +83,32 @@
 			],
 			flags: 'ok',
 		};
-		app.addNode(n);
-		setTimeout(function(){
-			n.inputs[1].label = "yessssssssssss"
-		}, 3000);
+
+		Utils.Vue.loadVue('common', 'worksheet.mixins', 'worksheet', 'node.mixins', 'node', 'pin.mixins', 'pin', 'pin.editors', 'link', 'app', function(){
+			var app = new Vue({
+				provide: {
+					getUid: function(prefix){return 'svg' + ((prefix) ? prefix : '') + id++;}, 
+				},
+				el: '#app',
+				data: {
+					title: ''
+				},
+				methods: {
+					addNode: function(data) {this.$refs.worksheet.addNode(data)},
+				}
+			});
+			app.addNode(n);
+			setTimeout(function(){
+				n.inputs[0].label = "yesssss"
+			}, 3000);
+			app.addNode(n2);
 		
-		console.dir(Vue)
+		
+		});
+
+
+		
+		console.log(n)
 	</script>
 	</body>
 	

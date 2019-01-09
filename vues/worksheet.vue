@@ -271,3 +271,23 @@
 	Vue.component('ex-titlebar', titleBarComponent);
 
 </script>
+
+<style>
+	.exWorksheet{
+		-webkit-user-select: none; /* Safari */        
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* IE10+/Edge */
+		user-select: none; /* Standard */	
+		border: 3px solid #000;
+		opacity: 0.9;
+	}
+
+	.exWorksheet .background{
+		fill: #262626;
+	}
+
+	.exWorksheet.focus {
+		border: 3px solid #00f;
+		opacity: 1;
+	}
+</style>

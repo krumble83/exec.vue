@@ -58,8 +58,6 @@
 
 <script>
 
-
-
 	const NodeComponent = {
 		mixins: [SvgBase, NodeDraggable, NodeSelectable],
 			
@@ -218,3 +216,45 @@
 	};
 	Vue.component('ex-node', NodeComponent);
 </script>
+
+<style>
+	.exWorksheet .exNode{
+		cursor: move;
+		stroke: none;
+		fill: none;
+
+		-webkit-user-select: none; /* Safari */        
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* IE10+/Edge */
+		user-select: none; /* Standard */
+	}
+
+	.exWorksheet .exNode rect.exNodeBody{
+		stroke: #000;
+		stroke-width:  1px;
+		fill: #000;
+
+		-webkit-user-select: none; /* Safari */        
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* IE10+/Edge */
+		user-select: none; /* Standard */
+	}
+
+	.exWorksheet .exNode text.exNodeTitle{
+		font-family: Helvetica, Arial, sans-serif;
+		font-size: 12px;
+		stroke: none;
+		fill: #fff;
+	}
+
+	.exWorksheet .exNode .exHeader{
+		stroke: none;
+	}
+	
+	.exWorksheet .exNode text.exNodeSubtitle{
+		font-family: Helvetica, Arial, sans-serif;
+		font-size: 12px;
+		stroke: none;
+		fill: #999;
+	}
+</style>

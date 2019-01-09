@@ -14,6 +14,8 @@
 	  }
 	});
 	
+	Vue.prototype.$eventBus = new Vue();
+	
 	const SvgBase = {
 		inject: ['getUid'], 
 		props: {
