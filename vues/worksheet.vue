@@ -66,8 +66,8 @@
 <script>
 
 	var worksheetComponent = {
-		inject: ['getUid'],
 		mixins: [WorksheetGrid, worksheetSelection],
+		inject: ['getUid'],
 		
 		data: function(){
 			return {
@@ -128,7 +128,7 @@
 				if(data.id) {
 					var found = false;
 					this.defs.foreach(function(elem){
-						//console.log(elem.id, data.id);
+						console.log(elem.id, data.id);
 						if(elem.id == data.id)
 							found = true;
 					});

@@ -15,10 +15,10 @@
 		<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
 		
 		<g class="exNodeHeader">
-			<path v-if="mTitle && mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 3) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
-			<path v-if="mTitle && !mSubtitle" :d="'m1.5,11.5c0,-5 5,-10 10,-10l+' + (mWidth-23) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 3) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
+			<path v-if="mTitle && mSubtitle" :d="'m2,12c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 4) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
+			<path v-if="mTitle && !mSubtitle" :d="'m2,11.5c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 4) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
 			<image v-if="img" :href="img" x="10" y="6" width="16" height="16" />
-			<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="18">{{mTitle}}</text>
+			<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="19">{{mTitle}}</text>
 			<text v-if="subtitle" class="exNodeSubtitle" :x="img ? '28' : 10" y="34">{{mSubtitle}}</text>
 		</g>
 		
@@ -241,20 +241,16 @@
 	}
 
 	.exWorksheet .exNode text.exNodeTitle{
-		font-family: Helvetica, Arial, sans-serif;
-		font-size: 12px;
-		stroke: none;
 		fill: #fff;
 	}
 
 	.exWorksheet .exNode .exHeader{
+		font-family: Helvetica, Arial, sans-serif;
+		font-size: 12px;
 		stroke: none;
 	}
 	
 	.exWorksheet .exNode text.exNodeSubtitle{
-		font-family: Helvetica, Arial, sans-serif;
-		font-size: 12px;
-		stroke: none;
 		fill: #999;
 	}
 </style>

@@ -58,13 +58,18 @@
 				offset.x -= this.mX + 12;
 				offset.y -= this.mY + 12;
 				
+				var ws = this.getWorksheet();
+				
+				
+				//console.dir(this.$el.transform);
+				
 				const updateFn = () => {
 					if (this.classObject.dragging) 
 						requestAnimationFrame(updateFn);
 					
 					if(this.getGridPosition){
 						this.mX = this.getGridPosition(point.x - offset.x);
-						this.mY = this.getGridPosition(point.y - offset.y);					
+						this.mY = this.getGridPosition(point.y - offset.y);
 					}
 					else {
 						this.mX = point.x - offset.x;

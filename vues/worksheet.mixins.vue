@@ -78,6 +78,7 @@
 				useGlobalMove: true,
 				restrictPanButton: 2,
 			});
+			this.$el._panzoom = panzoom;
 			this.$emit('panzoom', panzoom);
 		}
 	}

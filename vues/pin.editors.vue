@@ -7,3 +7,20 @@
 		</div>
 	</foreignObject>	
 </template>
+
+<script>
+
+	const PinEditorComponent = {
+
+		props: {
+			value: {},
+		},
+		
+		data: function(){
+			return {
+				value: this.mValue,
+			}
+		}
+	}
+
+</script>
