@@ -34,6 +34,11 @@
 			});		
 		},
 		
+		watch: {
+			mX: function(){this.$emit('node-dragged')},
+			mY: function(){this.$emit('node-dragged')},			
+		},
+		
 		data: function(){
 			return {
 				classObject: {

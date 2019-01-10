@@ -23,8 +23,22 @@
 		<slot />
 
 		<rect width="100%" height="100%" class="background" />
-		<g class="exViewport">
+		<g class="exViewport" ref="viewport">
 			<rect width="100000" height="100000" transform="translate(-50000,-50000)" :fill="'url(#' + gridId + ')'" />
+			<g class="exLinks">
+				<component v-for="link in links"
+					:is="link.ctor ? link.ctor : 'ex-link'"
+					:x1="link.x1"
+					:y1="link.y1"
+					:x2="link.x2"
+					:y2="link.y2"
+					:event="link.event"
+					:inputpin="link.inputpin"
+					:outputpin="link.outputpin"
+				/>
+				<slot name="links" />
+			</g>
+
 			<g class="exNodes">
 				<component v-for="node in nodes"
 					:is="node.ctor ? node.ctor : 'ex-node'" 
@@ -44,9 +58,6 @@
 					:outputs="node.outputs"
 				/>
 				<slot name="nodes" />
-			</g>
-			<g class="exLinks">
-				<slot name="links" />
 			</g>
 			<g class="exSelection">
 				<slot name="selection" />
@@ -107,11 +118,8 @@
 				this.nodes.push(data);
 			},
 			
-			addLink: function(startPin, evt){
-				this.links.push({
-					starPin: startPin,
-					startEvt: evt,
-				});
+			addLink: function(data){
+				this.links.push(data);
 			},
 			
 			addDef: function(data){
@@ -146,8 +154,8 @@
 				return this;
 			},
 			
-			getViewport: function(){
-				return this.$el.querySelector(".svg-pan-zoom_viewport");
+			getViewportEl: function(){
+				return this.$refs.viewport;
 			},
 			
 			getSvg: function(){

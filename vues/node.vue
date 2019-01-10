@@ -28,7 +28,7 @@
 		<g ref="inputs" class="exInputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
 			<component v-for="(pin, idx) in mInputs" :key="pin.id" 
 				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
-				slot="inputs" 
+				type="input" 
 				:class="pin.class"
 				:label="pin.label"
 				:type="pin.type"
@@ -47,7 +47,7 @@
 		<g ref="outputs" class="exOutputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
 			<component v-for="(pin, idx) in mOutputs" :key="pin.id" 
 				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
-				slot="outputs" 
+				type="output" 
 				:class="pin.class"
 				:label="pin.label"
 				:type="pin.type"
@@ -76,7 +76,7 @@
 			color: {default: '#00f'},
 			img: String,
 			inputs: {type: Array},
-			outputs: {},
+			outputs: {type: Array},
 		},
 		
 		data () {
@@ -152,9 +152,9 @@
 		},
 		
 		watch: {
-			mWidth: function(){this.$emit('resize')},
-			mHeight: function(){this.$emit('resize')},
-
+			mWidth: function(){this.$emit('node-resize')},
+			mHeight: function(){this.$emit('node-resize')},
+			
 			mTitle: function(){this.update()},
 			mSubtitle: function(){this.update()},
 			mInputs: function(){this.update()},
@@ -187,23 +187,19 @@
 				, outputsBox;
 				
 				// inputs
-				inputs.setAttribute('transform', 'translate(0, ' + (headBox.y + headBox.height + 10) + ')');
+				inputs.setAttribute('transform', 'translate(0, ' + (headBox.y + headBox.height + 20) + ')');
 				
 				//outputs
 				inputsBox = inputs.getBBox();
 				outputsBox = outputs.getBBox();
 
-				outputs.setAttribute('transform', 'translate(' + (inputsBox.x + inputsBox.width + 9 + outputsBox.width) + ', ' + (headBox.y + headBox.height + 10) + ')');
+				outputs.setAttribute('transform', 'translate(' + (inputsBox.x + inputsBox.width + 9 + outputsBox.width) + ', ' + (headBox.y + headBox.height + 20) + ')');
 				
 				//head
 				maxWidth = Math.max(maxWidth, headBox.width + headBox.x + 20, inputsBox.x + inputsBox.width + 9 + outputsBox.width);
 				
-				if(maxWidth != oldSize.w){
+				if(maxWidth != oldSize.w)
 					this.mWidth = maxWidth;
-					//console.log(inputsBox, outputsBox, headBox.width + headBox.x + 20);
-					this.$emit('node-resize');
-				}
-				//console.log(inputsBox, outputsBox);
 			},
 			
 			addInput: function(data){

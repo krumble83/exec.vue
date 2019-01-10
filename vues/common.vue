@@ -17,7 +17,35 @@
 
 	Vue.prototype.$eventBus = new Vue();
 	
+	const Viewport = {
+		methods: {
+			getWorksheet: function(){
+				return this.$parent.getWorksheet();
+			},
+			
+			getViewportEl: function(){
+				return this.$parent.getViewportEl();
+			},
+			
+			getSvg: function(){
+				return this.$parent.getSvg();
+			},
+			
+			getPoint(evt, point){
+				var viewport = this.getViewportEl();
+
+				if(!evt)
+					return this.getSvg().createSVGPoint();
+
+				point.x = evt.clientX;
+				point.y = evt.clientY;
+				point = point.matrixTransform(viewport.getCTM().inverse());
+			}
+		}	
+	}
+	
 	const SvgBase = {
+		mixins: [Viewport],
 		inject: ['getUid'], 
 		props: {
 			id: {type: String, default: function(){return this.getUid()}},
@@ -36,30 +64,5 @@
 				mWidth: this.width,
 			}
 		},
-		
-		methods: {
-			getWorksheet: function(){
-				return this.$parent.getWorksheet();
-			},
-			
-			getViewport: function(){
-				return this.$parent.getViewport();
-			},
-			
-			getSvg: function(){
-				return this.$parent.getSvg();
-			},
-			
-			getPoint(evt, point){
-				var viewport = this.getViewport();
-
-				if(!evt)
-					return this.getSvg().createSVGPoint();
-
-				point.x = evt.clientX;
-				point.y = evt.clientY;
-				point = point.matrixTransform(viewport.getCTM().inverse());
-			}
-		}
 	}	
 </script>

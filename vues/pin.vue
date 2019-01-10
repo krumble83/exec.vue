@@ -8,7 +8,7 @@
 		:height="mHeight" 
 		:label="mLabel"
 		@mousedown.left.stop="$emit('link-start', $event)"
-		@mouseup.left="$emit('stopLink')"
+		@mouseup.left.stop="$emit('stopLink')"
 		@mouseenter="mouseEnter"
 		@contextmenu.stop.prevent="contextMenu"
 		:overflow="mType=='output' ? 'visible' : ''"
@@ -136,9 +136,6 @@
 		
 		computed: {
 			
-			center: function(){
-				return {x:0, y:0 }
-			},
 			
 		},
 		
@@ -171,6 +168,17 @@
 					this.mWidth = oldWidth;
 			},
 			
+			getNode: function(){
+				return this.$parent;
+			},
+			
+			getCenter: function(){
+				var b = this.$refs.pin.getBoundingClientRect();
+				return {x: b.left-3, y: b.top-3};
+				//return this.$refs.pin.getBoundingClientRect().left;
+				//return {x:0, y:0}
+			},
+
 			isInput: function(){
 				return this.mType == 'input';
 			},

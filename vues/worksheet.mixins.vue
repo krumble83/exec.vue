@@ -191,7 +191,7 @@
 				
 				var instance = new SelectionRectangle();
 				instance.$mount();
-				this.getViewport().appendChild(instance.$el);
+				this.getViewportEl().appendChild(instance.$el);
 				
 				//this.workspace.push(SelectionRectangle);
 				var svgDropPoint;
