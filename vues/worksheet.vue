@@ -76,7 +76,7 @@
 <script>
 
 	var worksheetComponent = {
-		mixins: [WorksheetGrid, WorksheetSelection],
+		mixins: [WorksheetGrid, WorksheetSelection, WorksheetNodeDraggable],
 		inject: ['getUid'],
 		
 		data: function(){
@@ -85,8 +85,6 @@
 					focus: true,
 				},
 				defs: [],
-				nodes: [],
-				links: [],
 				selection: [],
 				workspace: [],
 			}
@@ -97,13 +95,28 @@
 			cls: String,
 		},
 		
+		computed: {
+			nodes: function() {
+				return this.$store.state.nodes;
+			},
+			links: function(){
+				return this.$store.state.links;
+			}
+		},
+
 		methods: {
 			addNode: function(data){
-				this.nodes.push(data);
+				if(!data.id)
+					data.id = this.getUid('node');
+				//this.nodes.push(data);
+				this.$store.commit('addNode', data);
 			},
 			
 			addLink: function(data){
-				this.links.push(data);
+				if(!data.id)
+					data.id = this.getUid('node');
+				this.$store.commit('addLink', data);
+				//this.links.push(data);
 			},
 			
 			addDef: function(data){

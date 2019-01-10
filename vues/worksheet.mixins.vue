@@ -84,6 +84,9 @@
 	}
 
 
+	
+	
+	
 	var SelectionRectangle = Vue.extend({
 		
 		template: '<rect :x="mX" :y="mY" width="100" class="selection" height="100" />',
@@ -108,7 +111,23 @@
 		},
 
 	});
+	
+	const NodeSelectable = {
 
+		data: function(){
+			return {
+				classObject: {
+					selected: false,
+				}		
+			}
+		},
+		
+		methods: {
+			
+		},
+	}
+
+	
 	var WorksheetSelection = {
 		
 		created: function(){

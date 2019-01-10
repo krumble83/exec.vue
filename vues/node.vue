@@ -25,7 +25,8 @@
 		
 		<g ref="inputs" class="exInputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
 			<component v-for="(pin, idx) in mInputs" :key="pin.id" 
-				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
+				:is="pin.ctor ? pin.ctor : 'ex-pin'"
+				:name="pin.name"
 				type="input" 
 				:max-link="pin.maxlink ? pin.maxlink : 1"
 				:class="pin.class"
@@ -46,6 +47,7 @@
 		<g ref="outputs" class="exOutputs" :transform="mSubtitle ? 'translate(7,50)' : mTitle ? 'translate(7,34)' : 'translate(7,14)'">
 			<component v-for="(pin, idx) in mOutputs" :key="pin.id" 
 				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
+				:name="pin.name"
 				type="output" 
 				:max-link="pin.maxlink ? pin.maxlink : 99"
 				:class="pin.class"
@@ -111,7 +113,7 @@
 		},
 		
 		watch: {
-			mWidth: function(){this.$emit('node-resize')},
+			mWidth: function(){this.$emit('node-resize');},
 			mHeight: function(){this.$emit('node-resize')},
 			
 			mTitle: function(){this.update()},
@@ -131,7 +133,7 @@
 		
 		mounted: function(){
 			this.update();
-			console.dir(this.$el);
+			console.dir(this.$store.getters.getNode(this.id));
 		},
 		
 		methods: {			

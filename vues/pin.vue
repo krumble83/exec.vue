@@ -1,6 +1,7 @@
 <template id="expinTpl">
 	<svg 
 		:id="mId"
+		:name="mName"
 		:class="classObject"
 		:x="mX" 
 		:y="mY" 
@@ -58,7 +59,7 @@
 		inject: ['addSvgDef'],
 		mixins: [SvgBase, PinLink, PinForeignEditor],
 		props: {
-
+			name: {},
 			height: {default: 20},
 			ctor: {default: 'ex-pin'},
 			label: String, 
@@ -113,6 +114,7 @@
 					linkable: true,
 					linked: false,
 				},
+				mName: this.name,
 				mLabel: this.label,
 				mType: this.type,
 				mColor: this.color,
@@ -133,6 +135,7 @@
 		
 		mounted: function(){
 			this.update();
+			console.log(this.$root);
 		},
 		
 		computed: {

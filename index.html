@@ -60,7 +60,7 @@
 			x: 300,
 			y: 300,
 			inputs: [
-				{id: 'input1', 
+				{name: 'input1', 
 					label: 'editor', 
 					color:'#f00',
 					editor: {
@@ -68,11 +68,11 @@
 					}, 
 					datatype: 'test'
 				},
-				{id: 'input2', label: 'inu', color:'#0f0', datatype: 'test'},
+				{name: 'input2', label: 'inu', color:'#0f0', datatype: 'test'},
 			],
 			outputs: [
-				{id: 'toto', label: 'tet', color:'#fff', datatype: 'test'},
-				{id: 'titi', label: 'cohfhrtfhrthrthrhyrl', color:'#fff', datatype: 'test'}
+				{name: 'toto', label: 'tet', color:'#fff', datatype: 'test'},
+				{name: 'titi', label: 'cohfhrtfhrthrthrhyrl', color:'#fff', datatype: 'test'}
 			],
 			flags: 'ok',
 		};
@@ -84,33 +84,46 @@
 			x: 100,
 			y: 100,
 			inputs: [
-				{id: 'toto', label: 'tetttt', color:'#f00', datatype: 'test'},
-				{id: 'titi', label: 'cool', color:'#0f0', datatype: 'test'},
+				{name: 'toto', label: 'tetttt', color:'#f00', datatype: 'test'},
+				{name: 'titi', label: 'cool', color:'#0f0', datatype: 'test'},
 			],
 			flags: 'ok',
 		};
 
-		Utils.Vue.loadVue('common', 'worksheet.mixins', 'link', 'worksheet', 'node.mixins', 'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
+		Utils.Vue.loadVue('common', 'worksheet.mixins', 'link', 'node.draggable', 'worksheet',  'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
 
+			var store = new Vuex.Store(BlueprintStore);
+			
 			var app = new Vue({
+				el: '#app',
 				store,
 				provide: {
 					getUid: function(prefix){return 'svg' + ((prefix) ? prefix : '') + id++;}, 
 				},
-				el: '#app',
+				
 				data: {
 					title: ''
 				},
+
 				methods: {
 					addNode: function(data) {this.$refs.worksheet.addNode(data)},
+					addLink: function(data) {this.$refs.worksheet.addLink(data)},
+				},
+				
+				ready: function(){
+				
 				}
 			});
-			app.addNode(n);
+			
 			setTimeout(function(){
-				n.inputs[0].label = "yesssss"
-			}, 3000);
-			app.addNode(n2);
-			console.dir(app);
+				app.addNode(n);
+				setTimeout(function(){
+					n.inputs[0].label = "yesssss"
+				}, 3000);
+				app.addNode(n2);
+
+			},10)
+			console.dir(Vue);
 		
 		});
 

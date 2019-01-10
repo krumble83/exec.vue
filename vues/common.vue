@@ -18,6 +18,46 @@
 	});
 	*/
 
+	
+	const BlueprintStore = {
+		state: {
+			nodes: [],
+			links: []
+		},
+
+		mutations: {
+			increment (state) {
+				state.count++
+			},
+
+			addNode: function(state, data) {
+				state.nodes.push(data);
+			},
+			
+			addLink: function(state, data) {
+				state.links.push(data);
+			},
+
+			changeNodeProperty: function(state, data){
+				state.nodes.find(node => node.id === data.node)[data.name] = data.value;
+			}
+		},
+		
+		getters: {
+			getNode: (state) => (id) => {
+				return state.nodes.find(node => node.id === id)
+			}
+		}
+	}	
+	
+	
+	const BlueprintStoreHelpers = {
+		methods: {
+			store: function(){return this.$root.store},
+		}
+	}
+	
+	
 	Vue.prototype.$eventBus = new Vue();
 	
 	const Viewport = {
