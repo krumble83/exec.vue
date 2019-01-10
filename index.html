@@ -4,6 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 		<link rel="stylesheet" type="text/css" href="css.css" media="all">
 		<script src="libs/vue.js"></script>
+		<script src="libs/vuex.js"></script>
 		<script src="libs/svg-pan-zoom.js"></script>
 		<script src="libs/color.js"></script>
 		<script src="utils.js"></script>
@@ -90,8 +91,9 @@
 		};
 
 		Utils.Vue.loadVue('common', 'worksheet.mixins', 'link', 'worksheet', 'node.mixins', 'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
-			
+
 			var app = new Vue({
+				store,
 				provide: {
 					getUid: function(prefix){return 'svg' + ((prefix) ? prefix : '') + id++;}, 
 				},
@@ -108,10 +110,10 @@
 				n.inputs[0].label = "yesssss"
 			}, 3000);
 			app.addNode(n2);
+			console.dir(app);
 		
 		});
 
-		//console.dir(Vue)
 	</script>
 	</body>
 	

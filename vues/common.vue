@@ -2,6 +2,8 @@
 	var id = 100;
 
 	function genUid(prefix){
+		while(document.querySelector('#svg' + ((prefix) ? prefix : '') + id))
+			id++;
 		return 'svg' + ((prefix) ? prefix : '') + id++;
 	}
 	

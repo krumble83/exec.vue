@@ -45,6 +45,7 @@
 		},
 		
 		watch: {
+			
 			mInputPin: {
 				immediate: true,
 				handler: function(){
@@ -80,27 +81,14 @@
 						return;
 					console.log('watch event');
 					
-					var me = this;				
-					
-					var mv = function(ev){
-						me.getPoint(ev, me.point);
-						if(me.mInputPin){
-							me.dc2.x = me.point.x;
-							me.dc2.y = me.point.y;
-						}
-						else if(me.mOutputPin){
-							me.dc1.x = me.point.x;
-							me.dc1.y = me.point.y;
-						}
-					}
-					
-					var rm = function(ev){
-						document.removeEventListener('mousemove', mv);
+					var me = this
+					, rm = function(ev){
+						document.removeEventListener('mousemove', me.update);
 						document.removeEventListener('mouseup', rm);
 					}
-					document.addEventListener('mousemove', mv);
+					document.addEventListener('mousemove', this.update);
 					document.addEventListener('mouseup', rm);
-					mv(this.mEvent);
+					this.update(this.mEvent);
 				}
 			}			
 		},
@@ -132,7 +120,12 @@
 			
 			},
 			
-			update: function(){
+			update: function(evt){
+				if(evt instanceof MouseEvent){
+					this.getPoint(evt, this.point);
+					this.dc1.x = this.dc2.x = this.point.x;
+					this.dc1.y = this.dc2.y = this.point.y;
+				}
 				if(this.mInputPin){
 					this.dc1.x = this.mInputPin.getCenter().x;
 					this.dc1.y = this.mInputPin.getCenter().y;

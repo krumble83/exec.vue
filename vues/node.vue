@@ -6,7 +6,7 @@
 		:y.sync="mY" 
 		:width="mWidth" 
 		:height="mWidth" 
-		:type="type"
+		:type="mType"
 		overflow="visible"
 		@mousedown.left.stop="leftMouseDown($event)" 
 		@contextmenu.prevent.stop="contextMenu($event)"
@@ -27,6 +27,7 @@
 			<component v-for="(pin, idx) in mInputs" :key="pin.id" 
 				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
 				type="input" 
+				:max-link="pin.maxlink ? pin.maxlink : 1"
 				:class="pin.class"
 				:label="pin.label"
 				:datatype="pin.datatype"
@@ -46,6 +47,7 @@
 			<component v-for="(pin, idx) in mOutputs" :key="pin.id" 
 				:is="pin.ctor ? pin.ctor : 'ex-pin'" 
 				type="output" 
+				:max-link="pin.maxlink ? pin.maxlink : 99"
 				:class="pin.class"
 				:label="pin.label"
 				:datatype="pin.datatype"
@@ -54,6 +56,7 @@
 				:width="pin.width"
 				:height="pin.height"
 				:color="pin.color"
+				:editor="pin.editor"
 				@pin-resize="$emit('pin-resize')"
 			/>				
 			<slot name="outputs" />
@@ -128,6 +131,7 @@
 		
 		mounted: function(){
 			this.update();
+			console.dir(this.$el);
 		},
 		
 		methods: {			
