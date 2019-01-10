@@ -27,11 +27,11 @@
 		},
 		
 		created: function(){
-			var me = this;
-			this.$on('node.leftmousedown', function(evt){
-				//console.log(evt);
-				me.dragMouseDown(evt);
-			});		
+			this.$on('node.leftmousedown', this.dragMouseDown);		
+		},
+		
+		beforeDestroy: function(){
+			this.$off('node.leftmousedown', this.dragMouseDown);	
 		},
 		
 		watch: {

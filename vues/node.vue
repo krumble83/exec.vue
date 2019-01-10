@@ -7,8 +7,6 @@
 		:width="mWidth" 
 		:height="mWidth" 
 		:type="type"
-		inputs=""
-		outputs=""
 		overflow="visible"
 		@mousedown.left.stop="leftMouseDown($event)" 
 		@contextmenu.prevent.stop="contextMenu($event)"
@@ -31,7 +29,7 @@
 				type="input" 
 				:class="pin.class"
 				:label="pin.label"
-				:type="pin.type"
+				:datatype="pin.datatype"
 				:x="0"
 				:y="idx*24" 
 				:width="pin.width"
@@ -50,7 +48,7 @@
 				type="output" 
 				:class="pin.class"
 				:label="pin.label"
-				:type="pin.type"
+				:datatype="pin.datatype"
 				:x="pin.x"
 				:y="idx*24" 
 				:width="pin.width"
@@ -84,61 +82,19 @@
 			var me = this
 			, def = {
 				props: {
-					is: 'linearGradient',
-					id: 'nodeHeader_' + this.color.replace('#', ''),
-					x1: '0',
-					y1: '0',
-					x2: '1',
-					y2: '0.4'
+					is: 'linearGradient',id: 'nodeHeader_' + this.color.replace('#', ''),x1: '0',y1: '0',x2: '1',y2: '0.4'
 				},
-				childs: [{
-					props : {
-						is: 'stop',
-						'stop-color': new Color(this.color).darker(0.1).toString(),
-						offset: '0'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': this.color,
-						offset: '0.02'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': new Color(this.color).darker(0.45).toString(),
-						offset: '0.3'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': new Color(this.color).darker(0.4).toString(),
-						offset: '0.7'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': new Color(this.color).darker(0.8).toString(),
-						offset: '0.95'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': new Color(this.color).darker(0.8).toString(),
-						offset: '1'
-					}
-				},
-				
+				childs: [
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.1).toString(),offset: '0'}},
+					{props: {is: 'stop','stop-color': this.color,offset: '0.02'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.45).toString(),offset: '0.3'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.4).toString(),offset: '0.7'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.8).toString(),offset: '0.95'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.8).toString(),offset: '1'}}				
 				]
 			}
 			this.$parent.addDef(def);
 			
-			//console.log(this.inputs);
 			return {
 				mTitle: this.title,
 				mSubtitle: this.subtitle,
@@ -160,15 +116,14 @@
 			mInputs: function(){this.update()},
 			mOutputs: function(){this.update()},
 		},
-		
-		updated: function(){
-		},
 
 		created: function(){
 			var me = this;
-			this.$on('pin-resize', function(){
-				me.update();
-			});
+			this.$on('pin-resize', this.update);
+		},
+		
+		beforeDestroy: function(){
+			this.$off('pin-resize', this.update);
 		},
 		
 		mounted: function(){
@@ -206,6 +161,10 @@
 				this.mInputs.push(data);
 			},
 			
+			addOutput: function(data){
+				this.mOutputs.push(data);
+			},
+
 			contextMenu: function(){console.log('Node:Context menu');},
 			
 			leftMouseDown: function(evt){

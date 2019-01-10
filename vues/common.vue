@@ -5,6 +5,7 @@
 		return 'svg' + ((prefix) ? prefix : '') + id++;
 	}
 	
+	/*
 	Vue.directive('focus', {
 	  // Quand l'élément lié est inséré dans le DOM...
 	  bind: function (el, zz, node) {
@@ -13,7 +14,7 @@
 		el.focus()
 	  }
 	});
-
+	*/
 
 	Vue.prototype.$eventBus = new Vue();
 	

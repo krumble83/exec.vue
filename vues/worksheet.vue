@@ -9,6 +9,7 @@
 		@contextmenu.prevent.stop="onContextMenu($event)" 
 		@mousedown.right="onRightButtonDown($event)"
 		@mousedown.left.stop="onLeftMouseDown($event)"
+		@mouseup.left="$emit('rightmouseup', $event)"
 		@keyup.enter="onRightButtonDown"
 	>
 		<defs>
@@ -28,19 +29,17 @@
 			<g class="exLinks">
 				<component v-for="link in links"
 					:is="link.ctor ? link.ctor : 'ex-link'"
-					:x1="link.x1"
-					:y1="link.y1"
-					:x2="link.x2"
-					:y2="link.y2"
 					:event="link.event"
 					:inputpin="link.inputpin"
 					:outputpin="link.outputpin"
+					:datatype="link.datatype"
+					:color="link.color"
 				/>
 				<slot name="links" />
 			</g>
 
 			<g class="exNodes">
-				<component v-for="node in nodes"
+				<component v-for="node in nodes" :key="node.id" 
 					:is="node.ctor ? node.ctor : 'ex-node'" 
 					class="exNode"
 					:id="node.id"
@@ -100,21 +99,6 @@
 		
 		methods: {
 			addNode: function(data){
-				//console.log(this._provided);
-
-				if(typeof data.id !== 'String')
-					data.id = this.getUid();
-
-				if(data.inputs){
-					Array.from(data.inputs).forEach(function (el, i) {
-						data.inputs[i].type = 'input';
-					});
-				}
-				if(data.outputs){
-					Array.from(data.outputs).forEach(function (el, i) {
-						data.outputs[i].type = 'output';
-					});
-				}
 				this.nodes.push(data);
 			},
 			
@@ -124,8 +108,7 @@
 			
 			addDef: function(data){
 				var me = this;
-				
-				
+								
 				if(Array.isArray(data)){
 					data.forEach(function(el){
 						me.addDef(el);

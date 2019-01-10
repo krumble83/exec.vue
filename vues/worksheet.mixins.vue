@@ -135,34 +135,17 @@
 
 			var def = {
 				//<linearGradient id="selectionHandlerStroke" x1="0" y1="0" x2="0" y2="1"><stop id="SvgjsStop1048" stop-color="#f1b000" offset="0"></stop><stop id="SvgjsStop1049" stop-color="#ce6d00" offset="1"></stop></linearGradient>
-				props: {
-					is: 'linearGradient',
-					id: 'selectionHandlerStroke',
-					x1: '0',
-					y1:'0',
-					x2: '0',
-					y2: '1'
+				props: {is: 'linearGradient',id: 'selectionHandlerStroke',x1: '0',y1:'0',x2: '0',y2: '1'
 				},
-				childs: [{
-					props : {
-						is: 'stop',
-						'stop-color': '#f1b000',
-						offset: '0'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': '#ce6d00',
-						offset: '1'
-					}
-				}]			
+				childs: [
+					{props : {is: 'stop','stop-color': '#f1b000',offset: '0'}},
+					{props: {is: 'stop','stop-color': '#ce6d00',offset: '1'}}
+				]			
 			};
 			this.addDef(def);
 		},
 		
-		methods: {
-			
+		methods: {			
 			unselectNode: function(node){
 				var target = this.getWorksheet().$el.querySelector('.exNodes');
 				if(!node){

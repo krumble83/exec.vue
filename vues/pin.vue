@@ -65,6 +65,7 @@
 			type: String,
 			flags: String,
 			color: {default: '#00f'},
+			datatype: {type: String, required: true},
 			
 			optionnal: Boolean,
 			isarray: Boolean,
