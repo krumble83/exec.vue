@@ -5,13 +5,13 @@
 		:x.sync="mX" 
 		:y.sync="mY" 
 		:width="mWidth" 
-		:height="mWidth" 
+		:height="mHeight" 
 		:type="mType"
 		overflow="visible"
 		@mousedown.left.stop="leftMouseDown($event)" 
 		@contextmenu.prevent.stop="contextMenu($event)"
 	>
-		<rect width="100%" height="100%" rx="15" ry="15" class="exNodeBody" />
+		<rect width="100%" height="100%" rx="13" ry="13" class="exNodeBody" />
 		
 		<g class="exNodeHeader" ref="header">
 			<path v-if="mTitle && mSubtitle" :d="'m2,12c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 4) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + mColor.replace('#', '') + ')'" />
@@ -29,7 +29,7 @@
 				:name="pin.name"
 				type="input" 
 				:max-link="pin.maxlink ? pin.maxlink : 1"
-				:class="pin.class"
+				:class="'exPin ' + pin.class"
 				:label="pin.label"
 				:datatype="pin.datatype"
 				:x="0"
@@ -50,7 +50,7 @@
 				:name="pin.name"
 				type="output" 
 				:max-link="pin.maxlink ? pin.maxlink : 99"
-				:class="pin.class"
+				:class="'exPin ' + pin.class"
 				:label="pin.label"
 				:datatype="pin.datatype"
 				:x="pin.x"
@@ -82,24 +82,7 @@
 			outputs: {type: Array},
 		},
 		
-		data () {
-			//console.log(this.color);
-			var me = this
-			, def = {
-				props: {
-					is: 'linearGradient',id: 'nodeHeader_' + this.color.replace('#', ''),x1: '0',y1: '0',x2: '1',y2: '0.4'
-				},
-				childs: [
-					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.1).toString(),offset: '0'}},
-					{props: {is: 'stop','stop-color': this.color,offset: '0.02'}},
-					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.45).toString(),offset: '0.3'}},
-					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.4).toString(),offset: '0.7'}},
-					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.8).toString(),offset: '0.95'}},
-					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.8).toString(),offset: '1'}}				
-				]
-			}
-			this.$parent.addDef(def);
-			
+		data () {		
 			return {
 				mTitle: this.title,
 				mSubtitle: this.subtitle,
@@ -123,7 +106,20 @@
 		},
 
 		created: function(){
-			var me = this;
+			var me = this
+			, def = {
+				props: {is: 'linearGradient',id: 'nodeHeader_' + this.color.replace('#', ''),x1: '0',y1: '0',x2: '1',y2: '0.4'},
+				childs: [
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.1).toString(),offset: '0'}},
+					{props: {is: 'stop','stop-color': this.color,offset: '0.02'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.45).toString(),offset: '0.3'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.4).toString(),offset: '0.7'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.8).toString(),offset: '0.95'}},
+					{props: {is: 'stop','stop-color': new Color(this.color).darker(0.8).toString(),offset: '1'}}				
+				]
+			}
+			this.getWorksheet().addDef(def);
+			
 			this.$on('pin-resize', this.update);
 		},
 		
@@ -133,7 +129,7 @@
 		
 		mounted: function(){
 			this.update();
-			console.dir(this.$store.getters.getNode(this.id));
+			//console.dir(this.$store.getters.getNode(this.id));
 		},
 		
 		methods: {			
@@ -141,6 +137,7 @@
 				//console.log('Node: Start resize ' + this.mTitle);
 				var oldSize = {w: this.mWidth, h: this.mHeight}
 				, maxWidth = 100
+				, maxHeigth = 100
 				, headBox = this.$refs.header.querySelector('g').getBBox()
 				, inputs = this.$refs.inputs
 				, outputs = this.$refs.outputs
@@ -161,21 +158,25 @@
 				
 				if(maxWidth != oldSize.w)
 					this.mWidth = maxWidth;
+					
+				maxHeigth = Math.max(maxHeigth, headBox.height + headBox.y + 30, headBox.height + headBox.y + 30 + inputsBox.height, headBox.height + headBox.y + 30 + outputsBox.height);
+				console.log(maxHeigth);
+				this.mHeight = maxHeigth;
 			},
 			
-			addInput: function(data){
+			zzzaddInput: function(data){
 				this.mInputs.push(data);
 			},
 			
-			addOutput: function(data){
+			zzzaddOutput: function(data){
 				this.mOutputs.push(data);
 			},
 
 			contextMenu: function(){console.log('Node:Context menu');},
 			
 			leftMouseDown: function(evt){
-				this.$eventBus.$emit('node.leftmousedown', this, evt);
-				this.$emit('node.leftmousedown', evt);
+				this.$emit('node-leftmousedown', evt);
+				this.$parent.$emit('node-leftmousedown', this, evt);
 			}
 		},
 		

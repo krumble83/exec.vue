@@ -4,8 +4,7 @@
 		:class="classObject" 
 		xmlns="http://www.w3.org/2000/svg" 
 		ref="worksheet" 
-		@mousemove="setFocus(true)"
-		@mouseout="setFocus(false)"
+		@mousedown="setFocus(true)"
 		@contextmenu.prevent.stop="onContextMenu($event)" 
 		@mousedown.right="onRightButtonDown($event)"
 		@mousedown.left.stop="onLeftMouseDown($event)"
@@ -26,9 +25,11 @@
 		<rect width="100%" height="100%" class="background" />
 		<g class="exViewport" ref="viewport">
 			<rect width="100000" height="100000" transform="translate(-50000,-50000)" :fill="'url(#' + gridId + ')'" />
-			<g class="exLinks">
+			<g class="exLinks" ref="links">
 				<component v-for="link in links"
 					:is="link.ctor ? link.ctor : 'ex-link'"
+					:id="link.id"
+					:class="'exLink ' + link.class"
 					:event="link.event"
 					:inputpin="link.inputpin"
 					:outputpin="link.outputpin"
@@ -38,11 +39,11 @@
 				<slot name="links" />
 			</g>
 
-			<g class="exNodes">
+			<g class="exNodes" ref="nodes">
 				<component v-for="node in nodes" :key="node.id" 
-					:is="node.ctor ? node.ctor : 'ex-node'" 
-					class="exNode"
+					:is="node.ctor ? node.ctor : 'ex-node'"
 					:id="node.id"
+					:class="'exNode ' + node.class"
 					:x.sync="node.x"
 					:y.sync="node.y"
 					:width="node.width"
@@ -58,17 +59,15 @@
 				/>
 				<slot name="nodes" />
 			</g>
-			<g class="exSelection">
+			<g class="exSelection" ref="selection">
 				<slot name="selection" />
 			</g>
 			<slot name="exViewport" />
 			<template v-for="(child, index) in workspace">
-				<component :is="child" :key="child.name"
-					:x="child.x" :y="child.y"
+				<component :is="child.is" v-bind="child"
 				/>
 			</template>
 		</g>
-		<ex-tooltip />
 		<slot name="front" />
 	</svg>
 </template>
@@ -76,7 +75,7 @@
 <script>
 
 	var worksheetComponent = {
-		mixins: [WorksheetGrid, WorksheetSelection, WorksheetNodeDraggable],
+		mixins: [WorksheetGrid, WorksheetSelection, WorksheetNodeDraggable, WorksheetTooltip],
 		inject: ['getUid'],
 		
 		data: function(){
@@ -99,9 +98,12 @@
 			nodes: function() {
 				return this.$store.state.nodes;
 			},
+			
 			links: function(){
 				return this.$store.state.links;
-			}
+			},
+			
+			$worksheet: function(){ return this; }
 		},
 
 		methods: {
@@ -128,19 +130,18 @@
 					});
 					return;
 				}
-				//console.log(this.defs);
-				if(data.id) {
+
+				if(data.props.id) {
 					var found = false;
-					this.defs.foreach(function(elem){
-						console.log(elem.id, data.id);
-						if(elem.id == data.id)
-							found = true;
+					this.defs.forEach(function(elem){
+						if(elem.props.id == data.props.id)
+							found = elem;
 					});
 					if(found)
-						return data.id;
+						return found;
 				}
 				else
-					data.id = this.getUid();
+					data.props.id = this.getUid();
 				
 				this.defs.push(data);
 				return data.id;
@@ -163,7 +164,8 @@
 			},
 			
 			setFocus: function(focus){
-				return;
+				console.log('setFocus');
+				//return;
 				if(focus){
 					this.classObject.focus = true;
 					this.$el.focus();
@@ -199,8 +201,8 @@
 			
 			onLeftMouseDown: function(evt){
 				console.log('worksheet:onLeftButtonDown');
-				this.$eventBus.$emit('worksheet.leftmousedown', this, evt);
-				this.$emit('worksheet.leftmousedown', evt);
+				//this.$eventBus.$emit('worksheet.leftmousedown', this, evt);
+				this.$emit('worksheet-leftmousedown', evt);
 				if(evt.defaultPrevented)
 					return;
 			}
@@ -273,7 +275,7 @@
 		template: '#titlebarTpl'	
 	};
 	Vue.component('ex-titlebar', titleBarComponent);
-
+	
 </script>
 
 <style>
@@ -294,4 +296,8 @@
 		border: 3px solid #00f;
 		opacity: 1;
 	}
+	
+	.exTitlebar text {
+		font-family: "Helvetica, Arial, sans-serif";
+	}	
 </style>

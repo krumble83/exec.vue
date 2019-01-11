@@ -5,8 +5,10 @@
 		
 		created: function(){
 			var me = this;
+			
 			var update = function(evt, node){
-				console.log('coucou :)', node);
+				//console.log('coucou :)', node);
+				me.$store.commit('changeNodeProperty', {node: node.id, props: {x: node.mX, y: node.mY}});
 			}
 			
 			this.$on('node-dragend', update);
@@ -24,22 +26,25 @@
 		mounted: function(){
 			//console.log('mounted')
 			if(this.getGridPosition){
+				var node = this.$store.getters.getNode(this.id);
+				node.x = this.getGridPosition(this.mX);
+				node.y = this.getGridPosition(this.mY);
 				this.mX = this.getGridPosition(this.mX);
 				this.mY = this.getGridPosition(this.mY);			
 			}
 		},
 		
 		created: function(){
-			this.$on('node.leftmousedown', this.dragMouseDown);		
+			this.$on('node-leftmousedown', this.dragMouseDown);		
 		},
 		
 		beforeDestroy: function(){
-			this.$off('node.leftmousedown', this.dragMouseDown);	
+			this.$off('node-leftmousedown', this.dragMouseDown);	
 		},
 		
 		watch: {
-			mX: function(){this.$emit('node-dragged')},
-			mY: function(){this.$emit('node-dragged')},			
+			//mX: function(){this.$emit('node-dragged')},
+			//mY: function(){this.$emit('node-dragged')},			
 		},
 		
 		data: function(){
@@ -58,8 +63,8 @@
 					return;
 
 				var point = this.getPoint()
+				, oldPos = {x: this.mX, y: this.mY}
 				, offset;
-				
 				
 				this.getPoint(evt, point);
 				
@@ -68,9 +73,6 @@
 				offset.y -= this.mY + 12;
 				
 				var ws = this.getWorksheet();
-				
-				
-				//console.dir(this.$el.transform);
 				
 				const updateFn = () => {
 					if (this.classObject.dragging) 
@@ -88,9 +90,9 @@
 				
 				const moveFn = (evt) => {
 					//this.$eventBus.$emit('node.dragmove', this, evt);
-					this.$emit('node-dragmove', evt);
-					if(evt.defaultPrevented)
-						return;
+					//this.$emit('node-dragmove', evt);
+					//if(evt.defaultPrevented)
+					//	return;
 					this.getPoint(evt, point);
 				}
 				
@@ -98,11 +100,10 @@
 					this.classObject.dragging = false;
 					document.removeEventListener('mousemove', moveFn);
 					document.removeEventListener('mouseup', stopFn);
-					
-					this.$store.commit('changeNodeProperty', {node: this.id, name: 'x', value: this.mX});
-					this.$store.commit('changeNodeProperty', {node: this.id, name: 'y', value: this.mY});
-					//this.$eventBus.$emit('node.dragend', evt);
-					this.$parent.$emit('node-dragend', evt, this);
+					if(this.mX != oldPos.x || this.mY != oldPos.y){
+						this.$emit('node-dragend', evt, this);
+						this.$parent.$emit('node-dragend', evt, this);
+					}
 				}
 
 				//this.$eventBus.$emit('node.dragstart', evt);

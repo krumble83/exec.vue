@@ -1,16 +1,16 @@
 <template id="expinTpl">
 	<svg 
 		:id="mId"
-		:name="mName"
 		:class="classObject"
 		:x="mX" 
 		:y="mY" 
 		:width="mWidth" 
-		:height="mHeight" 
-		:label="mLabel"
+		:height="mHeight"
+		:group="group"
 		@mousedown.left.stop="$emit('link-start', $event)"
-		@mouseup.left.stop="$emit('stopLink')"
-		@mouseenter="mouseEnter"
+		@mouseup.left.stop="$emit('link-finish')"
+		@mouseenter="$emit('pin-mouseenter', $event)"
+		@mouseleave="$emit('pin-mouseleave', $event)"
 		@contextmenu.stop.prevent="contextMenu"
 		:overflow="mType=='output' ? 'visible' : ''"
 	>
@@ -32,85 +32,41 @@
 
 <script>
 
-	const TooltipComponent = {
-		mixins: [SvgBase],
-		props: {
-			text: {}
-		},
-		
-		data: function(){
-			return {
-				classObject: {
-					hidden: true,
-				},
-			}
-		},
-
-		methods: {
-
-		},
-		
-		template: "#extooltipTpl"
-	};
-	Vue.component('ex-tooltip', TooltipComponent);
-
-
 	const PinComponent = {
 		inject: ['addSvgDef'],
 		mixins: [SvgBase, PinLink, PinForeignEditor],
 		props: {
-			name: {},
+			name: {type: String, required: true},
 			height: {default: 20},
-			ctor: {default: 'ex-pin'},
+			ctor: {type: String, default: 'ex-pin'},
 			label: String, 
 			type: String,
 			flags: String,
-			color: {default: '#00f'},
+			color: {default: '#00f', required: true},
 			datatype: {type: String, required: true},
+			'max-link': Number,
 			
 			optionnal: Boolean,
 			isarray: Boolean,
-			groupe: {type: String},
+			group: {type: String, default:''},
 			editor: false,
 		},
 		
-		data: function() {
+		created: function(){
 			var me = this
 			, def = {
-				props: {
-					is: 'linearGradient',
-					id: 'pinFocus_' + this.color.replace('#', '')
-				},
-				childs: [{
-					props : {
-						is: 'stop',
-						'stop-color': this.color,
-						'stop-opacity': '0.01',
-						offset: '0.1'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': this.color,
-						'stop-opacity': '0.4',
-						offset: '0.3'
-					}
-				},
-				{
-					props: {
-						is: 'stop',
-						'stop-color': this.color,
-						'stop-opacity': '0.01',
-						offset: '1'
-					}
-				}]			
+				props: {is: 'linearGradient',id: 'pinFocus_' + this.color.replace('#', '')},
+				childs: [{props : {is: 'stop','stop-color': this.color,'stop-opacity': '0.01',offset: '0.1'}},
+					{props: {is: 'stop','stop-color': this.color,'stop-opacity': '0.4',offset: '0.3'}},
+					{props: {is: 'stop','stop-color': this.color,'stop-opacity': '0.01',offset: '1'}}
+				]
 			};
-			this.$parent.$parent.addDef(def);
-			
+			this.getWorksheet().addDef(def);		
+		},
+		
+		data: function() {
 			return {
 				classObject: {
-					exPin: true,
 					linkable: true,
 					linked: false,
 				},
@@ -124,8 +80,14 @@
 		},
 		
 		watch: {
-
 			label: function(){
+				var me = this;
+					Vue.nextTick(function () {
+						me.update();
+					})
+			},
+			
+			editor: function(){
 				var me = this;
 					Vue.nextTick(function () {
 						me.update();
@@ -139,8 +101,7 @@
 		},
 		
 		computed: {
-			
-			
+			$node: function(){return this.$parent;},
 		},
 		
 		methods: {
@@ -170,10 +131,6 @@
 				}
 				else
 					this.mWidth = oldWidth;
-			},
-			
-			getNode: function(){
-				return this.$parent;
 			},
 			
 			getCenter: function(){

@@ -37,11 +37,16 @@
 			}
 		},
 		
+		computed: {
+
+		},
+		
 		methods: {
 		
 			update: function(e){
 				this.mWidth = Math.min(this.$refs.input.clientWidth + 5, 300);
 				this.mHeight = Math.min(this.$refs.input.clientHeight, 150) + 4;
+				this.$emit('editor-changed', this);
 				this.$parent.update();
 			},
 		

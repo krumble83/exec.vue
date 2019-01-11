@@ -1,9 +1,14 @@
 <template id="linktpl">
-	<line :ref="mEvent ? 'drawlink' : ''" :x1="dc1.x" :y1="dc1.y" :x2="dc2.x" :y2="dc2.y" :stroke="color" class="exLink" />
+	<line :id="id" :ref="mEvent ? 'drawlink' : ''" :x1="dc1.x" :y1="dc1.y" :x2="dc2.x" :y2="dc2.y" :stroke="color" :class="classObject" />
 </template>
 <script>
 
 	const PinLink = {
+		mixins: [WorksheetHelpers],
+		props: {
+			
+		},
+		
 		data: function(){
 			return {
 				classObject: {
@@ -15,28 +20,67 @@
 		created: function(){
 			var me = this;
 			this.$on('link-start', this.startLink);
+			this.$on('link-finish', this.finishLink);
+			this.$on('pin-mouseenter', this.mouseLinkEnter);
 		},
 		
 		beforeDestroy: function(){
 			this.$off('link-start', this.startLink);
+			this.$off('link-finish', this.finishLink);
+			this.$off('pin-mouseenter', this.mouseLinkEnter);
 		},
 		
 		methods: {
-			mouseEnter: function(evt){
-				//console.log('coucou');
+
+			mouseLinkEnter: function(evt){				
+				var me = this
+				, valid
+				, msg
+				, l = this.$worksheet.$el.querySelector('#drawlink');
+				
+				if(!l)
+					return;
+				l = l.__vue__;
+
+				valid = l.isPinLinkable(this);
+				if(valid === 0){					
+					this.$emit('link-valid');
+					msg = 'Link ok';
+				}
+				else {
+					this.$emit('link-invalid', valid);
+					msg = 'Link not ok';
+				}
+				this.$worksheet.showTooltip(evt, msg);
+				
+				this.$once('pin-mouseleave', function(){
+					this.$worksheet.hideTooltip();
+				});
+				
+				this.$parent.$on('mousemove', function(ev){
+					console.log('iii');
+					me.$worksheet.showTooltip(ev, msg);
+				});
 			},
 			
 			startLink: function(evt){
-				var d = {inputpin: this, event: evt, color: this.mColor}
+				var d = {id: 'drawlink', inputpin: this, event: evt, color: this.mColor}
 				this.getWorksheet().addLink(d);
+				
+			},
+			
+			finishLink: function(evt){
+				console.log('finish link');
 			}
 		},
 	}
 
 	const LinkComponent = {
-		mixins: [Viewport],
+		mixins: [WorksheetHelpers],
+		inject: ['getUid'],
 		
 		props: {
+			id: {type: String, default: genUid()},
 			inputpin: {},
 			outpoutpin: {},
 			event: {},
@@ -51,11 +95,11 @@
 				handler: function(){
 					if(!this.mInputPin)
 						return;
-					console.log('watch input ', this.mInputPin);
+					//console.log('watch input ', this.mInputPin);
 					
 					var me = this;
-					this.watchers.push(this.mInputPin.getNode().$watch('mX', me.update));
-					this.watchers.push(this.mInputPin.getNode().$watch('mY', me.update));
+					this.watchers.push(this.mInputPin.$node.$watch('mX', me.update));
+					this.watchers.push(this.mInputPin.$node.$watch('mY', me.update));
 					this.dc1.x = this.mInputPin.getCenter().x;
 					this.dc1.y = this.mInputPin.getCenter().y;
 				}
@@ -65,11 +109,11 @@
 				handler: function(){
 					if(!this.mOutputPin)
 						return;
-					console.log('watch output', this.mOutputPin);
+					//console.log('watch output', this.mOutputPin);
 					
 					var me = this;
-					this.watchers.push(this.mOutputPin.getNode().$watch('mX', me.update));				
-					this.watchers.push(this.mOutputPin.getNode().$watch('mY', me.update));
+					this.watchers.push(this.mOutputPin.$node.$watch('mX', me.update));				
+					this.watchers.push(this.mOutputPin.$node.$watch('mY', me.update));
 					this.dc2.x = this.mOutputPin.getCenter().x;
 					this.dc2.y = this.mOutputPin.getCenter().y;
 				}
@@ -79,7 +123,7 @@
 				handler: function(){
 					if(!this.mEvent)
 						return;
-					console.log('watch event');
+					//console.log('watch event');
 					
 					var me = this
 					, rm = function(ev){
@@ -101,6 +145,9 @@
 		
 		data: function(){
 			return {
+				classObject: {
+					
+				},
 				mInputPin: this.inputpin,
 				mOutputPin: this.outputpin,
 				mEvent: this.event,
@@ -118,6 +165,10 @@
 		methods: {
 			finishLink: function(){
 			
+			},
+			
+			isPinLinkable: function(pin){
+				return 0;
 			},
 			
 			update: function(evt){
