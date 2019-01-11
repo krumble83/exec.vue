@@ -11,21 +11,7 @@
 	</head>
 	
 	<body>
-	
 
-	<template id="extooltipTpl">
-		<svg
-			:x="0"
-			:y="0"
-			:width="100"
-			:height="100"
-			:class="classObject"
-		>
-			<rect width="100%" height="100%" class="exTooltip" />
-			<text x="3" y="3">{{text}}</text>
-		</svg>
-	</template>
-	
 	
 	<template id="titlebarTpl">
 		<g class="exTitlebar">
@@ -51,22 +37,23 @@
 	</div>
 	
 	<script>
-		
+				
 		var n = {
 			title: 'Make Array',
 			subtitle: 'target is me',
 			color: '#78c8fe',
 			img: 'function.png',
-			x: 300,
+			x: 450,
 			y: 300,
 			inputs: [
-				{name: 'input1', 
+				{
+					name: 'input1', 
 					label: 'editor', 
 					color:'#f00',
+					datatype: 'test',
 					editor: {
 						ctor: 'ex-pineditor-input',
 					}, 
-					datatype: 'test'
 				},
 				{name: 'input2', label: 'inu', color:'#0f0', datatype: 'test'},
 			],
@@ -90,7 +77,10 @@
 			flags: 'ok',
 		};
 
-		Utils.Vue.loadVue('common', 'worksheet.mixins', 'link', 'node.draggable', 'worksheet',  'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
+		Utils.Vue.loadVue('mixins', 
+			'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip',
+			'link', 
+			'node.draggable', 'worksheet',  'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
 
 			var store = new Vuex.Store(BlueprintStore);
 			
@@ -122,8 +112,8 @@
 				}, 3000);
 				app.addNode(n2);
 
-			},10)
-			console.dir(Vue);
+			},100)
+			//console.dir(Vue);
 		
 		});
 
