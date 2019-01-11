@@ -8,7 +8,7 @@
 		@contextmenu.prevent.stop="onContextMenu($event)" 
 		@mousedown.right="onRightButtonDown($event)"
 		@mousedown.left.stop="onLeftMouseDown($event)"
-		@mouseup.left="$emit('rightmouseup', $event)"
+		@mouseup.left="$emit('worksheet-rightmouseup', $event)"
 		@keyup.enter="onRightButtonDown"
 	>
 		<defs>

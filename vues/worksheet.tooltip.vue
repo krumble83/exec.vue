@@ -31,6 +31,7 @@
 
 			hideTooltip: function(){
 				var me = this;
+				clearTimeout(me.$tooltip.timer);
 				me.$tooltip.timer = null;
 				me.$tooltip.setAttribute('class', 'exTooltip');
 			},

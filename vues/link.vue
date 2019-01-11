@@ -38,29 +38,38 @@
 				, msg
 				, l = this.$worksheet.$el.querySelector('#drawlink');
 				
-				if(!l)
-					return;
-				l = l.__vue__;
+				var move = function(ev){
+					me.$worksheet.showTooltip(ev, msg);
+				}
+				
+				if(l){
+					l = l.__vue__;
 
-				valid = l.isPinLinkable(this);
-				if(valid === 0){					
-					this.$emit('link-valid');
-					msg = 'Link ok';
+					valid = l.isPinLinkable(this);
+					if(valid.code === 0){					
+						this.$emit('link-valid');
+						msg = valid.label;
+					}
+					else {
+						this.$emit('link-invalid', valid);
+						msg = valid.label;
+					}
 				}
-				else {
-					this.$emit('link-invalid', valid);
-					msg = 'Link not ok';
-				}
+				else 
+					msg = 'pin desc';
+					
 				this.$worksheet.showTooltip(evt, msg);
 				
+				this.$el.addEventListener('mousemove', move, false);
+
 				this.$once('pin-mouseleave', function(){
-					this.$worksheet.hideTooltip();
+					me.$worksheet.hideTooltip();
+					me.$el.removeEventListener('mousemove', move);
 				});
 				
-				this.$parent.$on('mousemove', function(ev){
-					console.log('iii');
-					me.$worksheet.showTooltip(ev, msg);
-				});
+				
+				this.$worksheet.showTooltip(evt, msg);
+				
 			},
 			
 			startLink: function(evt){
@@ -139,7 +148,7 @@
 		
 		beforeDestroy: function(){
 			this.watchers.forEach(function(el){
-				el.unwatch();
+				//el.unwatch();
 			});
 		},
 		
@@ -162,13 +171,39 @@
 			}
 		},
 		
+		mounted: function(){
+			this.$worksheet.$once('worksheet-rightmouseup', function(evt){
+				console.log('cancel link');
+				this.$store.commit('deleteLink', 'drawlink');
+				evt.stopPropagation();
+			});		
+		},
+		
 		methods: {
 			finishLink: function(){
 			
 			},
 			
 			isPinLinkable: function(pin){
-				return 0;
+				var ret = {code: 0, label: '<img src="img/linkok.png"> Place a new Link'};
+				var oPin = (this.mInputPin) ? this.mInputPin : this.mOutputPin;
+				
+				console.log(oPin.type, pin.type);
+				if(1 == 2) // WRONG DATATYPE
+					ret.code += 8;
+				
+				if(oPin.type == pin.type) // SAME PIN TYPE
+					ret.code += 4;
+				
+				if(oPin.$node == pin.$node) // SAME NODE
+					ret.code += 2;
+				
+				if(oPin == pin) // SAME PIN
+					ret.code += 1;
+					
+				if(ret.code > 0)
+					ret.label = '<div><img src="img/none.png"> (' + ret.code + ')';
+				return ret;
 			},
 			
 			update: function(evt){

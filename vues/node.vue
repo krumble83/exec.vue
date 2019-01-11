@@ -63,6 +63,10 @@
 			/>				
 			<slot name="outputs" />
 		</g>
+		<g class="exExtend" >
+			<rect x="3" y="100" width="98%" height="15" rx="8" ry="8" ref="optional" ></rect>
+			<text x="0" y="100" width="100%">↓</text>
+		</g>
 	</svg>
 </template>
 
@@ -138,6 +142,7 @@
 				var oldSize = {w: this.mWidth, h: this.mHeight}
 				, maxWidth = 100
 				, maxHeigth = 100
+				, optional = this.$refs.optional
 				, headBox = this.$refs.header.querySelector('g').getBBox()
 				, inputs = this.$refs.inputs
 				, outputs = this.$refs.outputs
@@ -161,6 +166,10 @@
 					
 				maxHeigth = Math.max(maxHeigth, headBox.height + headBox.y + 30, headBox.height + headBox.y + 30 + inputsBox.height, headBox.height + headBox.y + 30 + outputsBox.height);
 				console.log(maxHeigth);
+				if(optional){
+					optional.setAttribute('y', maxHeigth-12);
+					maxHeigth += 5;
+				}
 				this.mHeight = maxHeigth;
 			},
 			
@@ -197,6 +206,16 @@
 		user-select: none; /* Standard */
 	}
 
+	.exWorksheet .exNode .exExtend rect {
+		fill: #000;
+		cursor: pointer;
+	}
+
+	.exWorksheet .exNode .exExtend rect:hover {
+		fill: #555;
+		cursor: pointer;
+	}
+	
 	.exWorksheet .exNode rect.exNodeBody{
 		stroke: #000;
 		stroke-width:  1px;
