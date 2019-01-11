@@ -43,8 +43,8 @@
 			subtitle: 'target is me',
 			color: '#78c8fe',
 			img: 'function.png',
-			x: 450,
-			y: 300,
+			x: 100,
+			y: 100,
 			inputs: [
 				{
 					name: 'input1', 
@@ -55,7 +55,7 @@
 						ctor: 'ex-pineditor-input',
 					}, 
 				},
-				{name: 'input2', label: 'inu', color:'#0f0', datatype: 'test'},
+				{name: 'input2', label: 'inu', color:'#0f0', datatype: 'test', optional: true},
 			],
 			outputs: [
 				{name: 'toto', label: 'tet', color:'#fff', datatype: 'test'},
@@ -68,8 +68,8 @@
 			title: 'Split String long titre essai',
 			color: '#8000FF',
 			img: 'function.png',
-			x: 100,
-			y: 100,
+			x: 450,
+			y: 300,
 			inputs: [
 				{name: 'toto', label: 'tetttt', color:'#f00', datatype: 'test'},
 				{name: 'titi', label: 'cool', color:'#0f0', datatype: 'test'},
@@ -100,19 +100,18 @@
 					addLink: function(data) {this.$refs.worksheet.addLink(data)},
 				},
 				
-				ready: function(){
-				
+				mounted: function(){
+					setTimeout(function(){
+						app.addNode(n);
+						setTimeout(function(){
+							n.inputs[0].label = "yesssss"
+						}, 3000);
+						app.addNode(n2);
+
+					},500)
 				}
 			});
 			
-			setTimeout(function(){
-				app.addNode(n);
-				setTimeout(function(){
-					n.inputs[0].label = "yesssss"
-				}, 3000);
-				app.addNode(n2);
-
-			},100)
 			//console.dir(Vue);
 		
 		});

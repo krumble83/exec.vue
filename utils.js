@@ -79,6 +79,14 @@ var Utils = {
 	}
 } 
 
+const Library = {
+	Link : {
+		SAME_NODE: {},
+		SAME_PIN: {}
+	}
+	
+}
+
 function nl2br (str, is_xhtml) {
     if (typeof str === 'undefined' || str === null) {
         return '';
