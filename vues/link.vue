@@ -188,7 +188,9 @@
 				var ret = {code: 0, label: '<img src="img/linkok.png"> Place a new Link'};
 				var oPin = (this.mInputPin) ? this.mInputPin : this.mOutputPin;
 				
-				console.log(oPin.type, pin.type);
+				if(oPin.isarray !== pin.isarray) // ARRAY WITH NON-ARRAY
+					ret.code += 16;
+
 				if(1 == 2) // WRONG DATATYPE
 					ret.code += 8;
 				

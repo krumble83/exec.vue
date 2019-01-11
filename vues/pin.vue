@@ -16,11 +16,15 @@
 	>
 		<rect :transform="mType=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus_' + mColor.replace('#', '') + ')'" />
 		<template v-if="type == 'input'">
-			<circle cx="14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
+			<circle v-if="!isarray" cx="13" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
+			<image x="6" y="3" v-if="isarray" width="13" height="13" class="pin exArray" ref="pin" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAIAAAAmzuBxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAdSURBVChTY/z//z8DAwMjI04GExBTCkZtQQYMDACLJDABlbRJGwAAAABJRU5ErkJggg==" />
+			<!--<rect x="5" y="5" v-if="isarray" width="11" height="10" class="pin exArray" ref="pin" :stroke="mColor" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />-->
 			<text x="26" y="14" class="label" ref="label">{{label}}</text>
 		</template>
 		<template v-else>
-			<circle cx="-14" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
+			<circle v-if="!isarray" cx="-13" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
+			<image x="-20" y="3" v-if="isarray" width="13" height="13" class="pin exArray" ref="pin" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAIAAAAmzuBxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAdSURBVChTY/z//z8DAwMjI04GExBTCkZtQQYMDACLJDABlbRJGwAAAABJRU5ErkJggg==" />
+			<!--<rect x="-19" y="5" v-if="isarray" width="11" height="11" class="pin exArray" ref="pin" :stroke="mColor" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />-->
 			<text x="19" y="14" transform="translate(-47)" text-anchor="end" class="label" ref="label">{{label}}</text>
 		</template>
 		<component v-if="mEditor && classObject.linked==false" 
@@ -61,7 +65,17 @@
 					{props: {is: 'stop','stop-color': this.color,'stop-opacity': '0.01',offset: '1'}}
 				]
 			};
-			this.getWorksheet().addDef(def);		
+			this.$worksheet.addDef(def);
+			
+			if(this.isarray){
+				def = {
+					props: {is: 'pattern', id: 'pinArrayPattern_' + this.color.replace('#', ''), x: 0, y: 0, width: 11, height: 11, patternUnits: 'userSpaceOnUse'},
+					childs: [
+						{props: {is: 'rect', width: 2, height: 2, x: 2, y: 2, fill: this.color}}
+					]
+				};
+				this.$worksheet.addDef(def);
+			}
 		},
 		
 		data: function() {
@@ -199,6 +213,10 @@
 		pointer-events : none;
 	}
 
+	.exWorksheet .exNode .exPin image.pin.exArray{
+		pointer-events : none;
+	}
+	
 	.exWorksheet .exNode .exPin text.label{
 		stroke-width: 0;
 		font-size: 16px;

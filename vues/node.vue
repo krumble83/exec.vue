@@ -38,6 +38,7 @@
 				:height="pin.height"
 				:color="pin.color"
 				:editor="pin.editor"
+				:isarray="pin.isarray"
 				@pin-resize="$emit('pin-resize')"
 				
 			/>
@@ -59,6 +60,7 @@
 				:height="pin.height"
 				:color="pin.color"
 				:editor="pin.editor"
+				:isarray="pin.isarray"
 				@pin-resize="$emit('pin-resize')"
 			/>				
 			<slot name="outputs" />
