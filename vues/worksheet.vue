@@ -8,7 +8,7 @@
 		@contextmenu.prevent.stop="onContextMenu($event)" 
 		@mousedown.right="onRightButtonDown($event)"
 		@mousedown.left.stop="onLeftMouseDown($event)"
-		@mouseup.left="$emit('worksheet-rightmouseup', $event)"
+		@mouseup.left="$emit('worksheet-leftmouseup', $event)"
 		@keyup.enter="onRightButtonDown"
 	>
 		<defs>
@@ -29,23 +29,37 @@
 				<component v-for="link in links"
 					:is="link.ctor ? link.ctor : 'ex-link'"
 					:id="link.id"
+					ref="links"
 					:class="'exLink ' + link.class"
 					:event="link.event"
 					:inputpin="link.inputpin"
 					:outputpin="link.outputpin"
-					:datatype="link.datatype"
+					:datatype="link.datatype || 'test'"
 					:color="link.color"
+					:ref="link.ref"
+				/>
+				<component v-if="drawlink" 
+					:is="drawlink.ctor ? drawlink.ctor : 'ex-link'"
+					:id="drawlink.id"
+					:class="'exLink ' + drawlink.class"
+					:event="drawlink.event"
+					:inputpin="drawlink.inputpin"
+					:outputpin="drawlink.outputpin"
+					:datatype="drawlink.datatype || 'test'"
+					:color="drawlink.color"
+					:ref="drawlink.ref"
 				/>
 				<slot name="links" />
 			</g>
 
-			<g class="exNodes" ref="nodes">
+			<g class="exNodes" ref="nodesEl">
 				<component v-for="node in nodes" :key="node.id" 
 					:is="node.ctor ? node.ctor : 'ex-node'"
 					:id="node.id"
+					ref="nodes"
 					:class="'exNode ' + node.class"
-					:x.sync="node.x"
-					:y.sync="node.y"
+					:x="node.x"
+					:y="node.y"
 					:width="node.width"
 					:height="node.height"
 					:title.sync="node.title"
@@ -75,7 +89,7 @@
 <script>
 
 	var worksheetComponent = {
-		mixins: [WorksheetGrid, WorksheetSelection, WorksheetNodeDraggable, WorksheetTooltip],
+		mixins: [WorksheetGrid, WorksheetSelection, WorksheetNodeDraggable, WorksheetTooltip, WorksheetLibraryMenu],
 		inject: ['getUid'],
 		
 		data: function(){
@@ -86,12 +100,14 @@
 				defs: [],
 				selection: [],
 				workspace: [],
+				drawlink: false,
 			}
 		},
 		
 		props: {
 			id: String,
 			cls: String,
+			//drawlink: false,
 		},
 		
 		computed: {
@@ -114,11 +130,22 @@
 				this.$store.commit('addNode', data);
 			},
 			
+			getNode: function(id){
+				return this.$refs.find(node => node.id === id);
+			},
+			
+			drawLink: function(data){
+				Vue.set(this, 'drawlink', data);
+			},
+			
 			addLink: function(data){
 				if(!data.id)
 					data.id = this.getUid('node');
 				this.$store.commit('addLink', data);
-				//this.links.push(data);
+			},
+			
+			getLink: function(id){
+				return this.$refs.links.find(link => link.id === id);
 			},
 			
 			addDef: function(data){
@@ -165,7 +192,13 @@
 			
 			setFocus: function(focus){
 				console.log('setFocus');
-				//return;
+				this.$el.parentNode.focus();
+				var i = document.createElement('input');
+				i.setAttribute('display', 'none');
+				document.body.appendChild(i);
+				i.focus({preventScroll:true});
+				document.body.removeChild(i);
+				return;
 				if(focus){
 					this.classObject.focus = true;
 					this.$el.focus();
@@ -177,7 +210,7 @@
 			
 			onContextMenu: function(evt){
 				console.log('worksheet:onContextMenu');
-				this.$eventBus.$emit('worksheet.contextmenu', this, evt);
+				//this.$eventBus.$emit('worksheet.contextmenu', this, evt);
 				if(evt.defaultPrevented)
 					return;
 				this.$emit('worksheet.contextmenu', evt);
@@ -185,7 +218,7 @@
 			
 			onRightButtonDown: function(evt){
 				console.log('worksheet:onRightButtonDown');
-				this.$eventBus.$emit('worksheet.rightbuttondown', this, evt);
+				//this.$eventBus.$emit('worksheet.rightbuttondown', this, evt);
 				if(evt.defaultPrevented)
 					return;
 				this.$emit('worksheet.rightbuttondown', evt);
@@ -193,7 +226,7 @@
 			
 			onRightButtonUp: function(evt){
 				console.log('worksheet:onRightButtonUp');
-				this.$eventBus.$emit('worksheet.rightbuttonup', this, evt);
+				//this.$eventBus.$emit('worksheet.rightbuttonup', this, evt);
 				if(evt.defaultPrevented)
 					return;
 				this.$emit('worksheet.rightbuttonup', evt);
@@ -209,13 +242,6 @@
 		},
 
 		provide: {
-			getSvgMousePosition(evt) {
-				var CTM = this.$el.getScreenCTM();
-				return {
-					x: (evt.clientX - CTM.e) / CTM.a,
-					y: (evt.clientY - CTM.f) / CTM.d
-				};
-			},
 			addSvgDef: function(data){this.addDef(data)},
 		},
 		

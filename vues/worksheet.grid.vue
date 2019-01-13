@@ -1,6 +1,14 @@
 <script>
 
-	var WorksheetGrid = {
+	const NodeGrid = {
+		mounted: function(){
+			var node = this.$store.getters.getNode(this.id);
+			node.x = this.getGridPosition(this.x);
+			node.y = this.getGridPosition(this.y);
+		}				
+	}
+
+	const WorksheetGrid = {
 		inject: ['getUid'],
 		provide: {
 			getGridPosition: function(x, y){

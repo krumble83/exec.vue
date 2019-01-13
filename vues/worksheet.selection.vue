@@ -73,7 +73,7 @@
 		methods: {			
 			unselectNode: function(node){
 				var me = this
-				, target = this.$worksheet.$refs.nodes;
+				, target = this.$worksheet.$refs.nodesEl;
 				
 				if(!node){
 					this.$worksheet.$refs.selection.querySelectorAll('.exNode').forEach(function(el){
@@ -81,7 +81,8 @@
 					});
 					return;
 				}
-				target.appendChild(node.$el);
+				console.log(target);
+				target.$el.appendChild(node.$el);
 				node.classObject.selected = false;
 			},
 			

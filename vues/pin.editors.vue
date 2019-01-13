@@ -1,13 +1,11 @@
 <template id="pineditorinputtpl">
-	<svg>
-		<foreignObject :width="mWidth" :height="mHeight" :x="mX" :y="mY" class="exPinTextInput exEditor" ref="editor">
-			<div class="textareaWrapper" @mousedown.stop="">
-				<div class="textarea" ref="input" contenteditable="true" @focus="onFocus" @keydown.stop="update" @keyup="update">
-				{{mValue}}
-				</div>
+	<foreignObject is="foreignObject" :width="mWidth" :height="mHeight" :x="x" :y="y" :class="classObject" ref="editor" v-inline.horizontal="5" >
+		<div class="textareaWrapper" @mousedown.stop="" @mousemove.stop="">
+			<div class="textarea" ref="input" contenteditable="true" @focus="onFocus" @keydown.stop="update" @keyup="update" @blur="onBlur">
+			{{mValue}}
 			</div>
-		</foreignObject>	
-		</svg>
+		</div>
+	</foreignObject>	
 </template>
 
 <script>
@@ -17,28 +15,19 @@
 		props: {
 			ctor: {type: String},
 			value: {default: ''},
-			width:{default: 25},
+			width: {default: 25},
+			height: {default: 20}, 
 		},
-		
-		mounted() {
-			this.$nextTick(function () {
-				// remove unwanted element all other is work jQuery required
-				var el = this.$el;
-				this.$el.parentNode.append(this.$el.firstChild);
-				this.$el.parentNode.removeChild(el);
-				//console.log(this.$el);
-			})
-		},
-		
+			
 		data: function(){
 			return {
+				classObject: {
+					exPinTextInput: true,
+					blur: false,
+				},
 				mValue: this.value,
 				mCtor: this.ctor,
 			}
-		},
-		
-		computed: {
-
 		},
 		
 		methods: {
@@ -47,6 +36,8 @@
 				this.mWidth = Math.min(this.$refs.input.clientWidth + 5, 300);
 				this.mHeight = Math.min(this.$refs.input.clientHeight, 150) + 4;
 				this.$emit('editor-changed', this);
+				//this.$forceUpdate();
+				//this.$parent.$forceUpdate();
 				this.$parent.update();
 			},
 		
@@ -59,7 +50,18 @@
 					sel.removeAllRanges();
 					sel.addRange(range);
 				});
+				this.classObject.blur = false;
 			},
+			
+			onBlur: function(){
+				var me = this;
+				this.classObject.blur = true;
+				Vue.nextTick(function(){
+					me.mWidth = 65;
+					me.$parent.update();
+					me.$parent.$forceUpdate();
+				});
+			}
 			
 		},
 		
@@ -78,6 +80,17 @@
 	border: 1px solid #555;
 	background-color: #000;
 }
+
+.exWorksheet .exNode .exPin .exPinTextInput.blur .textareaWrapper {
+	max-height: 16px;
+	max-width: 60px;
+	overflow-y: hidden;
+	overflow-x: hidden;
+	padding: 1px;
+	border: 1px solid #555;
+	background-color: #000;
+}
+
 
 .exWorksheet .exNode .exPin .exPinTextInput .textareaWrapper .textarea {
 	cursor: text;

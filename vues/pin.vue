@@ -1,9 +1,8 @@
 <template id="expinTpl">
 	<svg 
-		:id="mId"
+		:id="id"
 		:class="classObject"
-		:x="mX" 
-		:y="mY" 
+		:x="x" 
 		:width="mWidth" 
 		:height="mHeight"
 		:group="group"
@@ -12,25 +11,21 @@
 		@mouseenter="$emit('pin-mouseenter', $event)"
 		@mouseleave="$emit('pin-mouseleave', $event)"
 		@contextmenu.stop.prevent="contextMenu"
-		:overflow="mType=='output' ? 'visible' : ''"
+		overflow="visible"
+		v-inline.vertical="5"
 	>
-		<rect :transform="mType=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus_' + mColor.replace('#', '') + ')'" />
+		<rect :transform="type=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus' + color.replace('#', '_') + ')'" />
 		<template v-if="type == 'input'">
-			<circle v-if="!isarray" cx="13" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
-			<image x="6" y="3" v-if="isarray" width="13" height="13" class="pin exArray" ref="pin" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAIAAAAmzuBxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAdSURBVChTY/z//z8DAwMjI04GExBTCkZtQQYMDACLJDABlbRJGwAAAABJRU5ErkJggg==" />
-			<!--<rect x="5" y="5" v-if="isarray" width="11" height="10" class="pin exArray" ref="pin" :stroke="mColor" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />-->
+			<circle v-if="!isarray" cx="13" cy="10" r="5" :stroke="color" class="pin" ref="pin" />
+			<rect x="8" y="4" v-if="isarray" width="11" height="10" class="pin exArray" ref="pin" :stroke="color" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />
 			<text x="26" y="14" class="label" ref="label">{{label}}</text>
 		</template>
 		<template v-else>
-			<circle v-if="!isarray" cx="-13" :cy="mHeight/2" r="5" :stroke="mColor" class="pin" ref="pin" />
-			<image x="-20" y="3" v-if="isarray" width="13" height="13" class="pin exArray" ref="pin" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAALCAIAAAAmzuBxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAdSURBVChTY/z//z8DAwMjI04GExBTCkZtQQYMDACLJDABlbRJGwAAAABJRU5ErkJggg==" />
-			<!--<rect x="-19" y="5" v-if="isarray" width="11" height="11" class="pin exArray" ref="pin" :stroke="mColor" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />-->
-			<text x="19" y="14" transform="translate(-47)" text-anchor="end" class="label" ref="label">{{label}}</text>
+			<circle v-if="!isarray" cx="-13" :cy="mHeight/2" r="5" :stroke="color" class="pin" ref="pin" />
+			<rect v-if="isarray" x="-19" y="4" width="10" height="11" class="pin exArray" ref="pin" :stroke="color" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />
+			<text x="19" y="14" id="zz" transform="translate(-47)" text-anchor="end" class="label" ref="label">{{label}}</text>
 		</template>
-		<component v-if="mEditor && classObject.linked==false" 
-			:is="mEditor.ctor"
-			
-		/>
+		<component v-if="editor && classObject.linked==false" :is="editor.ctor" class="exEditor" />
 	</svg>
 </template>
 
@@ -38,14 +33,14 @@
 
 	const PinComponent = {
 		inject: ['addSvgDef'],
-		mixins: [SvgBase, PinLink, PinForeignEditor],
+		mixins: [SvgBase, PinDrawLink, PinForeignEditor],
 		props: {
 			name: {type: String, required: true},
 			height: {default: 20},
 			ctor: {type: String, default: 'ex-pin'},
 			label: String, 
 			type: String,
-			flags: String,
+			flags: Number,
 			color: {default: '#00f', required: true},
 			datatype: {type: String, required: true},
 			'max-link': Number,
@@ -55,7 +50,8 @@
 			group: {type: String, default:''},
 			editor: false,
 		},
-		
+
+
 		created: function(){
 			var me = this
 			, def = {
@@ -71,7 +67,7 @@
 				def = {
 					props: {is: 'pattern', id: 'pinArrayPattern_' + this.color.replace('#', ''), x: 0, y: 0, width: 11, height: 11, patternUnits: 'userSpaceOnUse'},
 					childs: [
-						{props: {is: 'rect', width: 2, height: 2, x: 2, y: 2, fill: this.color}}
+						{props: {is: 'rect', width: 2, height: 2, x: 1, y: 1, fill: this.color}}
 					]
 				};
 				this.$worksheet.addDef(def);
@@ -84,12 +80,12 @@
 					linkable: true,
 					linked: false,
 				},
-				mName: this.name,
-				mLabel: this.label,
-				mType: this.type,
-				mColor: this.color,
-				mFlags: this.flags,
+				//mName: this.name,
+				//mLabel: this.label,
+				//mType: this.type,
+				//mColor: this.color,
 				mEditor: this.editor,
+				mLinkCount: 0,
 			}
 		},
 		
@@ -97,6 +93,7 @@
 			label: function(){
 				var me = this;
 					Vue.nextTick(function () {
+						//me.$forceUpdate();
 						me.update();
 					})
 			},
@@ -111,11 +108,14 @@
 		
 		mounted: function(){
 			this.update();
-			console.log(this.$root);
 		},
 		
 		computed: {
 			$node: function(){return this.$parent;},
+			center: function(){
+				var b = this.$refs.pin.getBoundingClientRect();
+				return {x: b.left-3, y: b.top-3};
+			},
 		},
 		
 		methods: {
@@ -123,19 +123,24 @@
 				//console.log('Pin:start resize ' + this.mLabel);
 				var me = this
 				, text = this.$refs.label
-				, editor = this.$el.querySelector('.exEditor')
 				, oldWidth = this.mWidth
 				, textBox
 				, width
 				
+				this.$el.querySelector('rect').setAttribute('opacity', 0);
+				
+				this.mWidth = this.$el.getBBox().width;
+				this.mHeight = this.$el.getBBox().height;
+				this.$el.querySelector('rect').setAttribute('opacity', 1);
+				this.$parent.update();
+				this.$forceUpdate();
+
+
+				/*
 				this.mWidth = 400;
 				textBox = text.getBBox();
 				
 				width = parseInt(text.getAttribute('x')) + textBox.width + 11;
-				if(editor){
-					editor.setAttribute('x', width);
-					width += parseInt(editor.getAttribute('width')) + 2;
-				}
 				
 				if( (width) != oldWidth){
 					this.mWidth = width;
@@ -145,25 +150,45 @@
 				}
 				else
 					this.mWidth = oldWidth;
+				*/
 			},
 			
 			getCenter: function(){
 				var b = this.$refs.pin.getBoundingClientRect();
-				return {x: b.left-3, y: b.top-3};
+				//var ret = {x: b.left-3, y: b.top-3};
+				//return ret;
+				//console.log(b);
+				
+				var p = this.getSvgPoint(b.left+6, b.top+6);
+				return p.matrixTransform(this.getViewportEl().getScreenCTM().inverse());
+				
+				//start = document.getElementById('startSVGElement');
+				spt = this.$el.createSVGPoint();
+				sCTM = this.$el.getScreenCTM();
+				//console.log(sCTM)
+
+				//end = document.getElementById('endSVGElement');
+				ept = this.getSvgPoint();//end.createSVGPoint();
+				eCTM = this.getViewportEl().getScreenCTM();	
+				//console.log(ept.matrixTransform( eCTM ).matrixTransform( sCTM.inverse()));
+				
+				var p = this.$el.createSVGPoint();
+				//console.log(p.matrixTransform(this.getViewportEl().getCTM().inverse()));
+				return p.matrixTransform(this.getViewportEl().getCTM().inverse());
 				//return this.$refs.pin.getBoundingClientRect().left;
 				//return {x:0, y:0}
 			},
 
 			isInput: function(){
-				return this.mType == 'input';
+				return this.type == 'input';
 			},
 			
 			isOutput: function(){
-				return this.mType == 'output';			
+				return this.type == 'output';			
 			},
 			
 			getType: function(){
-				return this.mType;
+				return this.type;
 			},
 						
 			contextMenu: function(){console.log('Pin:context menu')},
@@ -209,11 +234,13 @@
 	}
 
 	.exWorksheet .exNode .exPin circle.pin{
-		stroke-width: 3px;
+		stroke-width: 3;
 		pointer-events : none;
 	}
 
-	.exWorksheet .exNode .exPin image.pin.exArray{
+	.exWorksheet .exNode .exPin rect.pin.exArray{
+		stroke-width: 3;
+		stroke-dasharray: 3,2.1;
 		pointer-events : none;
 	}
 	

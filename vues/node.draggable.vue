@@ -8,7 +8,7 @@
 			
 			var update = function(evt, node){
 				//console.log('coucou :)', node);
-				me.$store.commit('changeNodeProperty', {node: node.id, props: {x: node.mX, y: node.mY}});
+				me.$store.commit('changeNodeProperty', {node: node.id, props: {x: node.x, y: node.y}});
 			}
 			
 			this.$on('node-dragend', update);
@@ -22,17 +22,6 @@
 
 	const NodeDraggable = {
 		inject: ['getGridPosition'],
-		
-		mounted: function(){
-			//console.log('mounted')
-			if(this.getGridPosition){
-				var node = this.$store.getters.getNode(this.id);
-				node.x = this.getGridPosition(this.mX);
-				node.y = this.getGridPosition(this.mY);
-				this.mX = this.getGridPosition(this.mX);
-				this.mY = this.getGridPosition(this.mY);			
-			}
-		},
 		
 		created: function(){
 			this.$on('node-leftmousedown', this.dragMouseDown);		
@@ -51,26 +40,27 @@
 			return {
 				classObject: {
 					dragging: false,
-				}
+				},
+				mX: 0,
+				mY: 0,
 			}
 		},
 		
 		methods: {
-
-			dragMouseDown(evt) {
-				
+			dragMouseDown(evt) {				
 				if(evt.defaultPrevented)
 					return;
 
-				var point = this.getPoint()
-				, oldPos = {x: this.mX, y: this.mY}
-				, offset;
+				var point = this.getSvgPoint()
+				, oldPos = {x: this.x, y: this.y}
+				, offset
+				, data = this.$store.getters.getNode(this.id);
 				
-				this.getPoint(evt, point);
+				this.getMousePoint(evt, point);
 				
 				offset = {x: point.x, y: point.y}
-				offset.x -= this.mX + 12;
-				offset.y -= this.mY + 12;
+				offset.x -= this.x + 12;
+				offset.y -= this.y + 12;
 				
 				var ws = this.getWorksheet();
 				
@@ -79,12 +69,12 @@
 						requestAnimationFrame(updateFn);
 					
 					if(this.getGridPosition){
-						this.mX = this.getGridPosition(point.x - offset.x);
-						this.mY = this.getGridPosition(point.y - offset.y);
+						data.x = this.mX = this.getGridPosition(point.x - offset.x);
+						data.y = this.mY = this.getGridPosition(point.y - offset.y);
 					}
 					else {
-						this.mX = point.x - offset.x;
-						this.mY = point.y - offset.y;
+						data.x = this.mX = point.x - offset.x;
+						data.y = this.mY = point.y - offset.y;
 					}
 				}
 				
@@ -93,17 +83,18 @@
 					//this.$emit('node-dragmove', evt);
 					//if(evt.defaultPrevented)
 					//	return;
-					this.getPoint(evt, point);
+					this.getMousePoint(evt, point);
 				}
 				
 				const stopFn = (evt) => {
 					this.classObject.dragging = false;
 					document.removeEventListener('mousemove', moveFn);
 					document.removeEventListener('mouseup', stopFn);
-					if(this.mX != oldPos.x || this.mY != oldPos.y){
+					if(this.x != oldPos.x || this.y != oldPos.y){
 						this.$emit('node-dragend', evt, this);
 						this.$parent.$emit('node-dragend', evt, this);
 					}
+					evt.stopPropagation();
 				}
 
 				//this.$eventBus.$emit('node.dragstart', evt);

@@ -5,6 +5,7 @@
 		<link rel="stylesheet" type="text/css" href="css.css" media="all">
 		<script src="libs/vue.js"></script>
 		<script src="libs/vuex.js"></script>
+		<script src="libs/vuex-undo-redo.min.js"></script>
 		<script src="libs/svg-pan-zoom.js"></script>
 		<script src="libs/color.js"></script>
 		<script src="utils.js"></script>
@@ -36,8 +37,11 @@
 		</ex-worksheet>
 	</div>
 	
-	<script>
-				
+	<script>		
+
+		Vue.use(Vuex);
+		Vue.use(VuexUndoRedo);
+
 		var n = {
 			title: 'Make Array',
 			subtitle: 'target is me',
@@ -48,18 +52,18 @@
 			inputs: [
 				{
 					name: 'input1', 
-					label: 'editor', 
+					label: 'editorzzzzz', 
 					color:'#f00',
-					datatype: 'test',
+					datatype: 'red',
 					editor: {
 						ctor: 'ex-pineditor-input',
 					}, 
 				},
-				{name: 'input2', label: 'inu', color:'#0f0', datatype: 'test', optional: true},
+				{name: 'input2', label: 'inu', color:'#0f0', datatype: 'green', optional: true},
 			],
 			outputs: [
-				{name: 'toto', label: 'tet', color:'#fff', datatype: 'test'},
-				{name: 'titi', label: 'cohfhrtfhrthrthrhyrl', color:'#fff', datatype: 'test', isarray: true}
+				{name: 'toto', label: 'tet', color:'#fff', datatype: 'white'},
+				{name: 'titi', label: 'cohfhrtfhrthrthrhyrl', color:'#fff', datatype: 'white', isarray: true}
 			],
 			flags: 'ok',
 		};
@@ -71,19 +75,18 @@
 			x: 450,
 			y: 300,
 			inputs: [
-				{name: 'toto', label: 'tetttt', color:'#f00', datatype: 'test', isarray: true},
-				{name: 'titi', label: 'cool', color:'#0f0', datatype: 'test'},
+				{name: 'toto', label: 'tetttt', color:'#f00', datatype: 'red', isarray: true},
+				{name: 'titi', label: 'cool', color:'#0f0', datatype: 'green'},
 			],
 			flags: 'ok',
 		};
 
 		Utils.Vue.loadVue('mixins', 
-			'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip',
+			'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip', 'worksheet.librarymenu',
 			'link', 
 			'node.draggable', 'worksheet',  'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
 
 			var store = new Vuex.Store(BlueprintStore);
-			
 			var app = new Vue({
 				el: '#app',
 				store,
@@ -108,7 +111,7 @@
 						}, 3000);
 						app.addNode(n2);
 
-					},500)
+					},50)
 				}
 			});
 			
