@@ -1,4 +1,11 @@
 
+function assert(ass, callback){
+	if(!ass){
+		if(typeof callback === 'function')
+			callback();
+		throw new Error('Assertion Error');
+	}
+};
 
 var Utils = {
 	Svg: {

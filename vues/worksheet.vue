@@ -30,18 +30,19 @@
 					:is="link.ctor ? link.ctor : 'ex-link'"
 					:id="link.id"
 					ref="links"
-					:class="'exLink ' + link.class"
+					:class="link.class"
+					class="exLink"
 					:event="link.event"
-					:inputpin="link.inputpin"
-					:outputpin="link.outputpin"
+					:input="link.input"
+					:output="link.output"
 					:datatype="link.datatype || 'test'"
 					:color="link.color"
-					:ref="link.ref"
 				/>
 				<component v-if="drawlink" 
 					:is="drawlink.ctor ? drawlink.ctor : 'ex-link'"
 					:id="drawlink.id"
-					:class="'exLink ' + drawlink.class"
+					:class="drawlink.class"
+					class="exLink"
 					:event="drawlink.event"
 					:inputpin="drawlink.inputpin"
 					:outputpin="drawlink.outputpin"
@@ -55,9 +56,11 @@
 			<g class="exNodes" ref="nodesEl">
 				<component v-for="node in nodes" :key="node.id" 
 					:is="node.ctor ? node.ctor : 'ex-node'"
-					:id="node.id"
 					ref="nodes"
-					:class="'exNode ' + node.class"
+					class="exNode"
+
+					:id="node.id"
+					:class="node.class"
 					:x="node.x"
 					:y="node.y"
 					:width="node.width"
@@ -130,8 +133,16 @@
 				this.$store.commit('addNode', data);
 			},
 			
-			getNode: function(id){
-				return this.$refs.find(node => node.id === id);
+			getNode: function(val){
+				if(typeof val == 'function')
+					return this.$refs.nodes.find(val);
+				
+				// assume val is the id of node
+				return this.$refs.nodes.find(node => node.id === val);
+			},
+			
+			removeNode: function(id){
+				this.$store.commit('deleteNode', id);
 			},
 			
 			drawLink: function(data){
@@ -144,8 +155,16 @@
 				this.$store.commit('addLink', data);
 			},
 			
-			getLink: function(id){
-				return this.$refs.links.find(link => link.id === id);
+			removeLink: function(id){
+				this.$store.commit('deleteLink', id);
+			},
+			
+			getLink: function(val){
+				if(typeof val == 'function')
+					return this.$refs.links.find(val);
+
+				// assume val is the id of node
+				return this.$refs.links.find(link => link.id === val);
 			},
 			
 			addDef: function(data){

@@ -3,12 +3,17 @@
 const WorksheetLibraryMenu = {
 	
 	created: function(){
-		this.$worksheet.$once('worksheet-leftmouseup', function(evt){
-			console.log('show library menu');
-			//evt.stopPropagation();
-			evt.preventDefault();
-		});
+		var me = this;
 		
+		me.$worksheet.$on('link-cancel', function(evt, link){
+			//console.log(this.$worksheet.$refs.drawlink);
+			
+			//evt.stopPropagation();
+			if(evt.target == link.$el){
+				evt.preventDefault();
+				console.log('show library menu', evt);
+			}
+		});
 	}
 	
 }

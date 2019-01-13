@@ -6,6 +6,8 @@
 		:width="mWidth" 
 		:height="mHeight"
 		:group="group"
+		:datatype="datatype"
+		:type="type"
 		@mousedown.left.stop="$emit('link-start', $event)"
 		@mouseup.left.stop="$emit('link-finish')"
 		@mouseenter="$emit('pin-mouseenter', $event)"
@@ -16,12 +18,12 @@
 	>
 		<rect :transform="type=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus' + color.replace('#', '_') + ')'" />
 		<template v-if="type == 'input'">
-			<circle v-if="!isarray" cx="13" cy="10" r="5" :stroke="color" class="pin" ref="pin" />
+			<circle v-if="!isarray" cx="13" cy="10" r="5" :stroke="color" :fill="color" class="pin" ref="pin" />
 			<rect x="8" y="4" v-if="isarray" width="11" height="10" class="pin exArray" ref="pin" :stroke="color" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />
 			<text x="26" y="14" class="label" ref="label">{{label}}</text>
 		</template>
 		<template v-else>
-			<circle v-if="!isarray" cx="-13" :cy="mHeight/2" r="5" :stroke="color" class="pin" ref="pin" />
+			<circle v-if="!isarray" cx="-13" :cy="mHeight/2" r="5" :stroke="color" :fill="color" class="pin" ref="pin" />
 			<rect v-if="isarray" x="-19" y="4" width="10" height="11" class="pin exArray" ref="pin" :stroke="color" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />
 			<text x="19" y="14" id="zz" transform="translate(-47)" text-anchor="end" class="label" ref="label">{{label}}</text>
 		</template>
@@ -154,29 +156,11 @@
 			},
 			
 			getCenter: function(){
-				var b = this.$refs.pin.getBoundingClientRect();
-				//var ret = {x: b.left-3, y: b.top-3};
-				//return ret;
-				//console.log(b);
+				var b = this.$refs.pin.getBoundingClientRect()
+				, p = this.getSvgPoint(b.left+6, b.top+6);
 				
-				var p = this.getSvgPoint(b.left+6, b.top+6);
 				return p.matrixTransform(this.getViewportEl().getScreenCTM().inverse());
-				
-				//start = document.getElementById('startSVGElement');
-				spt = this.$el.createSVGPoint();
-				sCTM = this.$el.getScreenCTM();
-				//console.log(sCTM)
 
-				//end = document.getElementById('endSVGElement');
-				ept = this.getSvgPoint();//end.createSVGPoint();
-				eCTM = this.getViewportEl().getScreenCTM();	
-				//console.log(ept.matrixTransform( eCTM ).matrixTransform( sCTM.inverse()));
-				
-				var p = this.$el.createSVGPoint();
-				//console.log(p.matrixTransform(this.getViewportEl().getCTM().inverse()));
-				return p.matrixTransform(this.getViewportEl().getCTM().inverse());
-				//return this.$refs.pin.getBoundingClientRect().left;
-				//return {x:0, y:0}
 			},
 
 			isInput: function(){
@@ -187,8 +171,19 @@
 				return this.type == 'output';			
 			},
 			
-			getType: function(){
-				return this.type;
+			addLink: function(link){
+				var me = this;
+				me.classObject.linked = true;
+				me.mLinkCount++;
+				link.$once('remove', function(){
+					me.mLinkCount--;
+					if(me.mLinkCount == 0)
+						me.classObject.linked = false;
+				});
+			},
+			
+			acceptLink: function(link){
+				return 0;
 			},
 						
 			contextMenu: function(){console.log('Pin:context menu')},
@@ -236,13 +231,23 @@
 	.exWorksheet .exNode .exPin circle.pin{
 		stroke-width: 3;
 		pointer-events : none;
+		fill-opacity: 0;
 	}
 
+	.exWorksheet .exNode .exPin.linked circle.pin{
+		fill-opacity: 1;
+	}
+	
 	.exWorksheet .exNode .exPin rect.pin.exArray{
 		stroke-width: 3;
 		stroke-dasharray: 3,2.1;
 		pointer-events : none;
 	}
+
+	.exWorksheet .exNode .exPin.linked rect.pin.exArray{
+		fill-opacity: 1;
+	}
+
 	
 	.exWorksheet .exNode .exPin text.label{
 		stroke-width: 0;

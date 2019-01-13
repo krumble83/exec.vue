@@ -81,8 +81,8 @@
 					});
 					return;
 				}
-				console.log(target);
-				target.$el.appendChild(node.$el);
+
+				target.appendChild(node.$el);
 				node.classObject.selected = false;
 			},
 			

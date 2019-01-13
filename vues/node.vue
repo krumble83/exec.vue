@@ -16,7 +16,7 @@
 		<g class="exNodeHeader" ref="header">
 			<path v-if="title && subtitle" :d="'m2,12c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 4) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + color.replace('#', '') + ')'" />
 			<path v-if="title && !subtitle" :d="'m2,11.5c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 4) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + color.replace('#', '') + ')'" />
-			<image v-if="img" :href="'img/' + img" x="10" y="6" width="16" height="16" />
+			<image v-if="img" :href="'img/' + img" x="10" y="6" width="16" height="16" @mousedown.stop="remove" />
 			<g>
 				<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="19">{{title}}</text>
 				<text v-if="subtitle" class="exNodeSubtitle" :x="img ? '28' : 10" y="34">{{subtitle}}</text>
@@ -28,7 +28,8 @@
 				<component v-for="(pin, idx) in inputs" :key="pin.id" 
 					:is="pin.ctor ? pin.ctor : 'ex-pin'"
 					:max-link="pin.maxlink ? pin.maxlink : 1"
-					:class="'exPin ' + pin.class"
+					class="exPin"
+					:class="pin.class"
 					:ref="'input_' + pin.name"
 					@pin-resize="$emit('pin-resize')"
 
@@ -93,6 +94,13 @@
 			inputs: {type: Array},
 			outputs: {type: Array},
 			expendable: Boolean,
+		},
+		
+		data: function() {
+			return {
+				classObject: {
+				},
+			}
 		},
 		
 		watch: {
@@ -168,6 +176,12 @@
 				}
 				*/
 				this.mHeight = maxHeigth;
+			},
+			
+			remove: function(){
+				this.$emit('remove');
+				this.$worksheet.$emit('node-remove');
+				this.$worksheet.removeNode(this.id);
 			},
 			
 			addInput: function(data){

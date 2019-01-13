@@ -51,13 +51,11 @@
 			y: 100,
 			inputs: [
 				{
-					name: 'input1', 
-					label: 'editorzzzzz', 
-					color:'#f00',
-					datatype: 'red',
-					editor: {
-						ctor: 'ex-pineditor-input',
-					}, 
+					name: 'entry', 
+					label: '', 
+					color:'#fff',
+					datatype: 'exec',
+					ctor: 'ex-pinexec',
 				},
 				{name: 'input2', label: 'inu', color:'#0f0', datatype: 'green', optional: true},
 			],
@@ -78,13 +76,25 @@
 				{name: 'toto', label: 'tetttt', color:'#f00', datatype: 'red', isarray: true},
 				{name: 'titi', label: 'cool', color:'#0f0', datatype: 'green'},
 			],
+			outputs: [
+				{name: 'toto', label: 'zzz', color:'#fff', datatype: 'white', ctor: 'ex-pinexec'},
+			],
 			flags: 'ok',
 		};
+		
+		var n3 = {
+			ctor: 'ex-nodereroute',
+			x: 700,
+			y: 300,
+			pin: {name: 'toto', label: 'tetttt', color:'#f00', datatype: 'red', isarray: true}
+		}
 
 		Utils.Vue.loadVue('mixins', 
 			'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip', 'worksheet.librarymenu',
-			'link', 
-			'node.draggable', 'worksheet',  'node', 'pin.mixins', 'pin', 'pin.editors', 'app', function(){
+			'link', 'link.draw', 
+			'node.draggable', 'worksheet',  'node', 'node.reroute', 
+			'pin.mixins', 'pin', 'pin.editors', 'pin.exec', 
+			'app', function(){
 
 			var store = new Vuex.Store(BlueprintStore);
 			var app = new Vue({
@@ -107,9 +117,10 @@
 					setTimeout(function(){
 						app.addNode(n);
 						setTimeout(function(){
-							n.inputs[0].label = "yesssss"
+							//n.inputs[0].label = "yesssss"
 						}, 3000);
 						app.addNode(n2);
+						app.addNode(n3);
 
 					},50)
 				}

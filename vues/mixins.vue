@@ -14,7 +14,7 @@
 				return;
 			if(prev.nodeName == '#text')
 				prev = prev.previousSibling;
-			
+			//console.log(prev);
 			var box = prev.getBBox();
 			if(bind && bind.modifiers && bind.modifiers.debug)
 				console.log(el, prev, box, el.getCTM())//.getTransformToElement(prev));
@@ -202,7 +202,7 @@
 			id: {type: String, default: function(){return this.getUid()}},
 			x: {type: Number, default: 0}, 
 			y: {type: Number, default: 0}, 
-			width: {type: Number, default: 50}, 
+			width: {type: Number, default: 30}, 
 			height: {type: Number, default: 100}
 		},
 		

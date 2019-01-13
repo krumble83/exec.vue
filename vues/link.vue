@@ -1,90 +1,12 @@
 <template id="linktpl">
-	<line :id="id" :x1="dc1.x" :y1="dc1.y" :x2="dc2.x" :y2="dc2.y" :stroke="color" :class="classObject" :datatype="datatype" />
+	<path :id="id" :stroke="color" :d="'M' + dc1.x + ',' + dc1.y + ' C' + (dp1.x) + ',' + dp1.y + ' ' + (dp2.x) + ',' + dp2.y + ' ' + dc2.x + ',' + dc2.y" fill="none" @mousedown.stop="remove" />
+	<!--<line :id="id" :x1="dc1.x" :y1="dc1.y" :x2="dc2.x" :y2="dc2.y" :stroke="color" :class="classObject" :datatype="datatype" />-->
 </template>
 
 <script>
 
-	const PinDrawLink = {
+	const LinkComponent = {
 		mixins: [WorksheetHelpers],
-		
-		created: function(){
-			var me = this;
-			this.$on('link-start', this.startLink);
-			this.$on('link-finish', this.finishLink);
-			this.$on('pin-mouseenter', this.mouseLinkEnter);
-		},
-		
-		beforeDestroy: function(){
-			this.$off('link-start', this.startLink);
-			this.$off('link-finish', this.finishLink);
-			this.$off('pin-mouseenter', this.mouseLinkEnter);
-		},
-		
-		methods: {
-
-			mouseLinkEnter: function(evt){				
-				var me = this
-				, link = this.$worksheet.$refs.drawlink
-				, valid
-				, msg;
-				
-				var move = function(ev){
-					me.$worksheet.showTooltip(ev, msg);
-				}
-				
-				if(link && link[0]){
-					link = link[0];
-
-					valid = link.isPinLinkable(this);
-					if(valid.code === 0){					
-						this.$emit('link-valid');
-						msg = valid.label;
-					}
-					else {
-						this.$emit('link-invalid', valid);
-						msg = valid.label;
-					}
-				}
-				else 
-					msg = 'pin desc';
-					
-				this.$worksheet.showTooltip(evt, msg);
-				
-				this.$el.addEventListener('mousemove', move, false);
-
-				this.$once('pin-mouseleave', function(){
-					me.$worksheet.hideTooltip();
-					me.$el.removeEventListener('mousemove', move);
-				});
-								
-				this.$worksheet.showTooltip(evt, msg);
-				
-			},
-			
-			startLink: function(evt){
-				if(this.isInput())
-					var d = {id: 'drawlink', inputpin: this, event: evt, color: this.color, datatype: this.datatype, ref:'drawlink'}
-				else
-					var d = {id: 'drawlink', outputpin: this, event: evt, color: this.color, datatype: this.datatype, ref:'drawlink'}
-				
-				this.$worksheet.drawLink(d);
-				//this.$worksheet.addLink(d);
-			},
-			
-			finishLink: function(evt){
-				console.log('finish link', this.$worksheet.$refs.drawlink);
-				var link = this.$worksheet.$refs.drawlink;
-				if(!link || !link)
-					return;
-				link.finishLink(this);
-			}
-		},
-	}
-
-	const DrawLinkComponent = {
-		mixins: [WorksheetHelpers],
-		inject: ['getUid'],
-		
 		props: {
 			id: {type: String, default: genUid()},
 			datatype: {type: String, default: 'totoType'},
@@ -97,121 +19,100 @@
 				node: String,
 				pin: String
 			},
-
-			inputpin: {},
-			outputpin: {},
-			event: {},
 		},
 		
 		watch: {			
 			mInputPin: {
 				immediate: true,
-				handler: function(){
-					if(!this.mInputPin)
+				handler: function(val, old){
+					if(!val)
 						return;
-					console.log('watch input ', this.mInputPin);
+					console.log('watch input ', val, old);
 					
-					this.watchers.push(this.mInputPin.$node.$watch('mX', this.update));
-					this.watchers.push(this.mInputPin.$node.$watch('mY', this.update));
-
-					//var d = this.$worksheet.getLink(this.id);
-					//this.$store.commit('changeLinkProperty', {link: this.id, props:{inputpin: this.mInputPin, input: {node: this.mInputPin.$node.id, pin: this.mInputPin.name}}});
-
+					this.watchers.input.push(val.$node.$watch('mX', this.update));
+					this.watchers.input.push(val.$node.$watch('mY', this.update));
+					val.$node.$once('remove', this.remove);
+					if(old){
+						this.watchers.input.forEach(function(el){
+							el();
+						});
+						old.$node.$off('remove', this.remove);
+					}
 				}
 			},
 			
 			mOutputPin: {
 				immediate: true,
-				handler: function(){
-					if(!this.mOutputPin)
+				handler: function(val, old){
+					if(!val)
 						return;
-					console.log('watch output', this.outputpin);
+					console.log('watch output', this.mOutputPin);
 					
-					this.watchers.push(this.mOutputPin.$node.$watch('mX', this.update));				
-					this.watchers.push(this.mOutputPin.$node.$watch('mY', this.update));
-
-					//var d = this.$worksheet.getLink(this.id);
-					//this.$store.commit('changeLinkProperty', {link: this.id, props:{outputpin: this.mOutputPin, output: {node: this.mOutputPin.$node.id, pin: this.mOutputPin.name}}});
-
+					this.watchers.output.push(val.$node.$watch('mX', this.update));				
+					this.watchers.output.push(val.$node.$watch('mY', this.update));
+					val.$node.$once('remove', this.remove);
+					if(old){
+						this.watchers.output.forEach(function(el){
+							el();
+						});
+						old.$node.$off('remove', this.remove);
+					}
 				}
 			},
-			
-			mEvent: {
-				immediate: true,
-				handler: function(){
-					if(!this.mEvent)
-						return;
-					//console.log('watch event');
-					
-					document.addEventListener('mousemove', this.update);
-					document.addEventListener('mouseup', this.removeListeners);
-					this.update(this.mEvent);
-				}
-			}			
+		},
+		
+		mounted: function(){
+			if(this.input){
+				var n = this.$worksheet.getNode(this.input.node);
+				console.assert(n);
+				var p = n.getInput(this.input.pin, true);
+				console.assert(p);
+				this.mInputPin = p;
+			}
+			if(this.output){
+				var n = this.$worksheet.getNode(this.output.node);
+				console.assert(n);
+				var p = n.getOutput(this.output.pin, true);
+				console.assert(p);
+				this.mOutputPin = p;
+			}
+			if(this.mInputPin && this.mOutputPin){
+				this.mInputPin.addLink(this);
+				this.mOutputPin.addLink(this);
+			}
+			this.update();
 		},
 		
 		beforeDestroy: function(){
-			this.watchers.forEach(function(el){
+			this.$emit('remove');
+			this.$worksheet.$emit('link-remove', this);			
+			this.watchers.input.forEach(function(el){
 				el();
 			});
+			this.watchers.output.forEach(function(el){
+				el();
+			});
+
+			if(this.mInputPin)
+				this.mInputPin.$node.$off('remove', this.remove);
+			if(this.mOutputPin)
+				this.mOutputPin.$node.$off('remove', this.remove);
 		},
 		
 		data: function(){
 			return {
 				classObject: {},
-				mInputPin: this.inputpin,
-				mOutputPin: this.outputpin,
-				mEvent: this.event,
-				point: this.getSvgPoint(),
+				mInputPin: false,
+				mOutputPin: false,
 				dc1: {x: 0, y:0},
 				dc2: {x: 0, y:0},
 				dp1: {x: 0, y:0},
 				dp2: {x: 0, y:0},
-				watchers: [],
+				watchers: {input: [], output: []},
 			}
 		},
-		
-		
-		created: function(){
-			console.log(this.input);
-			
-		},
-		
-		mounted: function(){
-			var me = this;
-			this.$worksheet.$once('worksheet-leftmouseup', function(evt){
-				me.removeListeners();
-				if(evt.defaultPrevented)
-					return;
-
-				console.log('cancel link');
-				//this.$store.commit('deleteLink', 'drawlink');
-				evt.stopPropagation();
-			});		
-		},
-		
+						
 		methods: {
-			finishLink: function(pin){
-				if(pin.isInput())
-					this.mInputPin = pin;
-				else if(pin.isOutput())
-					this.mOutputPin = pin;
-				console.log(this.$worksheet.$refs);
-				/*
-				var d = this.$worksheet.getLink(this.id);
-				//this.$store.commit('changeLinkProperty', {link: this.id, props:{id: genUid(), ref: undefined}});
-				//this.$store.setters.changeLinkProperty('test', 'toto');
-				
-				var index = this.$worksheet.$refs.drawlink.indexOf(this);
-				if (index > -1) {
-				  this.$worksheet.$refs.drawlink.splice(index, 1);
-				  console.log('ok');
-				}		
-				*/
-				//var l = {inputpin: }
-				this.$worksheet.addLink(this.$worksheet.drawlink);
-				this.update();
-			},
 			
 			isPinLinkable: function(pin){
 				var ret = {code: 0, label: '<img src="img/linkok.png"> Place a new Link'};
@@ -238,35 +139,48 @@
 				return ret;
 			},
 			
-			update: function(evt){
-				if(evt instanceof MouseEvent){
-					var point = this.getMousePoint(evt, this.point);
-					this.dc1.x = this.dc2.x = point.x;
-					this.dc1.y = this.dc2.y = point.y;
-				}
+			update: function(){
 				if(this.mInputPin){
 					this.dc1.x = this.mInputPin.getCenter().x;
 					this.dc1.y = this.mInputPin.getCenter().y;
+					this.dp1.x = this.dc1.x - 200;
+					this.dp1.y = this.dc1.y;
 				}
 				if(this.mOutputPin){
 					this.dc2.x = this.mOutputPin.getCenter().x;
 					this.dc2.y = this.mOutputPin.getCenter().y;
+					this.dp2.x = this.dc2.x + 200;
+					this.dp2.y = this.dc2.y;
 				}
+				this.updateIntermediatePoints();
 			},
 			
-			removeListeners: function(){
-				document.removeEventListener('mousemove', this.update);
-				document.removeEventListener('mouseup', this.removeListeners);
+			updateIntermediatePoints: function(){
+				if(this.mInputPin){
+					this.dp1.x = this.dc1.x - 200;
+					this.dp1.y = this.dc1.y;
+				}
+				if(this.mOutputPin){
+					this.dp2.x = this.dc2.x + 200;
+					this.dp2.y = this.dc2.y;
+				}
+			
+			},
+			
+			remove: function(){
+				console.log('remove')
+				this.$worksheet.removeLink(this.id);
 			}
 		},
 		template: '#linktpl'
 	}
-	Vue.component('ex-link', DrawLinkComponent);
+	Vue.component('ex-link', LinkComponent);
 	
 </script>
 
 <style>
 	.exLink{
 		stroke-width: 3;
+		pointer-events: all;
 	}
 </style>
