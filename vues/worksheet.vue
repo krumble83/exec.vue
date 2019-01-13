@@ -30,25 +30,14 @@
 					:is="link.ctor ? link.ctor : 'ex-link'"
 					:id="link.id"
 					ref="links"
-					:class="link.class"
 					class="exLink"
-					:event="link.event"
-					:input="link.input"
-					:output="link.output"
-					:datatype="link.datatype || 'test'"
-					:color="link.color"
+					v-bind="link"
 				/>
 				<component v-if="drawlink" 
 					:is="drawlink.ctor ? drawlink.ctor : 'ex-link'"
 					:id="drawlink.id"
-					:class="drawlink.class"
 					class="exLink"
-					:event="drawlink.event"
-					:inputpin="drawlink.inputpin"
-					:outputpin="drawlink.outputpin"
-					:datatype="drawlink.datatype || 'test'"
-					:color="drawlink.color"
-					:ref="drawlink.ref"
+					v-bind="drawlink"
 				/>
 				<slot name="links" />
 			</g>
@@ -58,21 +47,7 @@
 					:is="node.ctor ? node.ctor : 'ex-node'"
 					ref="nodes"
 					class="exNode"
-
-					:id="node.id"
-					:class="node.class"
-					:x="node.x"
-					:y="node.y"
-					:width="node.width"
-					:height="node.height"
-					:title.sync="node.title"
-					:subtitle="node.subtitle"
-					:type="node.type"
-					:flags="node.flags"
-					:color="node.color"
-					:img="node.img"
-					:inputs="node.inputs"
-					:outputs="node.outputs"
+					v-bind="node"					
 				/>
 				<slot name="nodes" />
 			</g>

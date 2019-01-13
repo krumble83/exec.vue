@@ -17,15 +17,15 @@
 		v-inline.vertical="5"
 	>
 		<rect :transform="type=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus' + color.replace('#', '_') + ')'" />
-		<template v-if="type == 'input'">
-			<circle v-if="!isarray" cx="13" cy="10" r="5" :stroke="color" :fill="color" class="pin" ref="pin" />
-			<rect x="8" y="4" v-if="isarray" width="11" height="10" class="pin exArray" ref="pin" :stroke="color" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />
-			<text x="26" y="14" class="label" ref="label">{{label}}</text>
-		</template>
-		<template v-else>
+		<template v-if="type == 'output'">
 			<circle v-if="!isarray" cx="-13" :cy="mHeight/2" r="5" :stroke="color" :fill="color" class="pin" ref="pin" />
 			<rect v-if="isarray" x="-19" y="4" width="10" height="11" class="pin exArray" ref="pin" :stroke="color" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />
 			<text x="19" y="14" id="zz" transform="translate(-47)" text-anchor="end" class="label" ref="label">{{label}}</text>
+		</template>
+		<template v-else>
+			<circle v-if="!isarray" cx="13" cy="10" r="5" :stroke="color" :fill="color" class="pin" ref="pin" />
+			<rect x="8" y="4" v-if="isarray" width="11" height="10" class="pin exArray" ref="pin" :stroke="color" stroke-width="4" :fill="'url(#pinArrayPattern' + color.replace('#', '_') + ')'" />
+			<text x="26" y="14" class="label" ref="label">{{label}}</text>
 		</template>
 		<component v-if="editor && classObject.linked==false" :is="editor.ctor" class="exEditor" />
 	</svg>

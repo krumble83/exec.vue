@@ -14,25 +14,13 @@
 		<rect width="100%" height="100%" rx="13" ry="13" class="exNodeBody" />
 		
 		<component  
-			:is="pin.ctor ? pin.ctor : 'ex-pin'"
-			:max-link="pin.maxlink ? pin.maxlink : 1"
+			:is="pin.ctor ? pin.ctor : 'ex-pinreroute'"
+			:max-link="99"
 			class="exPin"
-			:class="pin.class"
-			:ref="'input_' + pin.name"
-			@pin-resize="$emit('pin-resize')"
-
-			:name="pin.name"
-			type="input" 
-			:label="pin.label"
-			:datatype="pin.datatype"
-			:x="0"
-			:y="0"
-			:width="pin.width"
-			:height="pin.height"
-			:color="pin.color"
-			:editor="pin.editor"
-			:isarray="pin.isarray"
-			
+			:ref="pin"
+			:x="6"
+			:y="3"
+			v-bind="pin"			
 		/>		
 	</svg>
 </template>

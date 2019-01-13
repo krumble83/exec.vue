@@ -86,14 +86,14 @@
 			ctor: 'ex-nodereroute',
 			x: 700,
 			y: 300,
-			pin: {name: 'toto', label: 'tetttt', color:'#f00', datatype: 'red', isarray: true}
+			pin: {name: 'toto', label: '', color:'#f00', datatype: 'red'}
 		}
 
 		Utils.Vue.loadVue('mixins', 
 			'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip', 'worksheet.librarymenu',
 			'link', 'link.draw', 
 			'node.draggable', 'worksheet',  'node', 'node.reroute', 
-			'pin.mixins', 'pin', 'pin.editors', 'pin.exec', 
+			'pin.mixins', 'pin', 'pin.editors', 'pin.exec', 'pin.reroute', 
 			'app', function(){
 
 			var store = new Vuex.Store(BlueprintStore);

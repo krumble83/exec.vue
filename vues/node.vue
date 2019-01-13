@@ -29,21 +29,11 @@
 					:is="pin.ctor ? pin.ctor : 'ex-pin'"
 					:max-link="pin.maxlink ? pin.maxlink : 1"
 					class="exPin"
-					:class="pin.class"
 					:ref="'input_' + pin.name"
-					@pin-resize="$emit('pin-resize')"
-
-					:name="pin.name"
 					type="input" 
-					:label="pin.label"
-					:datatype="pin.datatype"
 					:x="0"
-					:width="pin.width"
-					:height="pin.height"
-					:color="pin.color"
-					:editor="pin.editor"
-					:isarray="pin.isarray"
-					
+					@pin-resize="$emit('pin-resize')"
+					v-bind="pin"
 				/>
 			</slot>
 		</g>
@@ -53,20 +43,11 @@
 				<component v-for="(pin, idx) in outputs" :key="pin.id" 
 					:is="pin.ctor ? pin.ctor : 'ex-pin'" 
 					:max-link="pin.maxlink ? pin.maxlink : 99"
-					:class="'exPin ' + pin.class"
+					class="exPin"
 					:ref="'output_' + pin.name"
-					@pin-resize="$emit('pin-resize')"
-
-					:name="pin.name"
 					type="output" 
-					:label="pin.label"
-					:datatype="pin.datatype"
-					:x="pin.x"
-					:width="pin.width"
-					:height="pin.height"
-					:color="pin.color"
-					:editor="pin.editor"
-					:isarray="pin.isarray"
+					@pin-resize="$emit('pin-resize')"
+					v-bind="pin"
 				/>				
 			</slot>
 		</g>
