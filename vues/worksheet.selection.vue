@@ -1,5 +1,4 @@
 <script>
-	
 	const NodeSelectable = {
 		data: function(){
 			return {
@@ -36,6 +35,7 @@
 		},
 
 	});
+	
 	
 	var WorksheetSelection = {
 		

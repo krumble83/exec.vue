@@ -79,8 +79,8 @@
 		},
 
 		mutations: {
-			increment (state) {
-				state.count++
+			emptyState() {
+				this.replaceState({ nodes: [], links: [] });
 			},
 
 			addNode: function(state, data) {
@@ -93,36 +93,36 @@
 			
 			deleteNode: function(state, node){
 				var n = this.getters.getNode(node);
-				if(n && state.nodes.indexOf(n) > -1)
+				console.assert(n);
+				if(state.nodes.indexOf(n) > -1)
 					state.nodes.splice(state.nodes.indexOf(n), 1);
 			},
 
 			deleteLink: function(state, link){
 				var l = this.getters.getLink(link);
-				if(n && state.links.indexOf(l) > -1)
+				console.assert(l);
+				if(state.links.indexOf(l) > -1)
 					state.links.splice(state.links.indexOf(l), 1);
 			},
 
 			changeNodeProperty: function(state, data){
 				var n = state.nodes.find(node => node.id === data.node);
-				if(!n)
-					return;
-				
+				console.assert(n);
 				for(var index in data.props) { 
 					if (data.props.hasOwnProperty(index)) {
+						//n[index] = data.props[index];
 						Vue.set(n, index, data.props[index]);
 					}
 				}				
 			},
 			
-			changeLinkProperty: function(state, data){
-				var l = state.links.find(link => link.id === data.link);
-				if(!l)
-					return;
-				
+			changeNodePropertyShadow: function(state, data){
+				var n = state.nodes.find(node => node.id === data.node);
+				console.assert(n);
 				for(var index in data.props) { 
 					if (data.props.hasOwnProperty(index)) {
-						Vue.set(l, index, data.props[index]);
+						//n[index] = data.props[index];
+						Vue.set(n, index, data.props[index]);
 					}
 				}				
 			},

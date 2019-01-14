@@ -1,11 +1,11 @@
-<template id="linktpl">
+<template>
 	<path :id="id" :stroke="color" :d="'M' + dc1.x + ',' + dc1.y + ' C' + (dp1.x) + ',' + dp1.y + ' ' + (dp2.x) + ',' + dp2.y + ' ' + dc2.x + ',' + dc2.y" fill="none" @mousedown.stop="remove" />
 	<!--<line :id="id" :x1="dc1.x" :y1="dc1.y" :x2="dc2.x" :y2="dc2.y" :stroke="color" :class="classObject" :datatype="datatype" />-->
 </template>
 
 <script>
 
-	const LinkComponent = {
+	module.exports = {
 		mixins: [WorksheetHelpers],
 		props: {
 			id: {type: String, default: genUid()},
@@ -29,8 +29,8 @@
 						return;
 					console.log('watch input ', val, old);
 					
-					this.watchers.input.push(val.$node.$watch('mX', this.update));
-					this.watchers.input.push(val.$node.$watch('mY', this.update));
+					this.watchers.input.push(val.$node.$watch('x', this.update));
+					this.watchers.input.push(val.$node.$watch('y', this.update));
 					val.$node.$once('remove', this.remove);
 					if(old){
 						this.watchers.input.forEach(function(el){
@@ -48,8 +48,8 @@
 						return;
 					console.log('watch output', this.mOutputPin);
 					
-					this.watchers.output.push(val.$node.$watch('mX', this.update));				
-					this.watchers.output.push(val.$node.$watch('mY', this.update));
+					this.watchers.output.push(val.$node.$watch('x', this.update));				
+					this.watchers.output.push(val.$node.$watch('y', this.update));
 					val.$node.$once('remove', this.remove);
 					if(old){
 						this.watchers.output.forEach(function(el){
@@ -84,6 +84,7 @@
 		},
 		
 		beforeDestroy: function(){
+			this.startSequence();		
 			this.$emit('remove');
 			this.$worksheet.$emit('link-remove', this);			
 			this.watchers.input.forEach(function(el){
@@ -97,6 +98,7 @@
 				this.mInputPin.$node.$off('remove', this.remove);
 			if(this.mOutputPin)
 				this.mOutputPin.$node.$off('remove', this.remove);
+			this.stopSequence();
 		},
 		
 		data: function(){
@@ -168,13 +170,13 @@
 			},
 			
 			remove: function(){
-				console.log('remove')
+				console.log('remove');
 				this.$worksheet.removeLink(this.id);
 			}
 		},
-		template: '#linktpl'
+		//template: '#linktpl'
 	}
-	Vue.component('ex-link', LinkComponent);
+	//Vue.component('ex-link', LinkComponent);
 	
 </script>
 

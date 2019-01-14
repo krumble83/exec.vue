@@ -1,4 +1,4 @@
-<template id="expinrerouteTpl">
+<template>
 	<svg 
 		:id="id"
 		:class="classObject"
@@ -23,12 +23,16 @@
 
 <script>
 
-	const PinRerouteComponent = {
-		mixins: [PinComponent],
+	module.exports = {
+		mixins: [expin],
 	
-		template: "#expinrerouteTpl"
+		methods: {
+			update: function(){}
+		},
+	
+		//template: "#expinrerouteTpl"
 	};
-	Vue.component('ex-pinreroute', PinRerouteComponent);
+	//Vue.component('ex-pinreroute', PinRerouteComponent);
 
 
 </script>

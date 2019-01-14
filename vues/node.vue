@@ -1,9 +1,9 @@
-<template id="exnodeTpl">
+<template>
 	<svg
 		:class="classObject"
 		:id="id"
-		:x="x" 
-		:y="y" 
+		:x="mX" 
+		:y="mY" 
 		:width="mWidth" 
 		:height="mHeight" 
 		:type="type"
@@ -62,7 +62,7 @@
 
 <script>
 
-	const NodeComponent = {
+	module.exports = {
 		mixins: [SvgBase, NodeDraggable, NodeSelectable, NodeGrid],
 			
 		props: {
@@ -81,6 +81,8 @@
 			return {
 				classObject: {
 				},
+				mX: this.x,
+				mY: this.y,
 			}
 		},
 		
@@ -192,10 +194,7 @@
 				this.$parent.$emit('node-leftmousedown', this, evt);
 			}
 		},
-		
-		template: "#exnodeTpl"
 	};
-	Vue.component('ex-node', NodeComponent);
 </script>
 
 <style>

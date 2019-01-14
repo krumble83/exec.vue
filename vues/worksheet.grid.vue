@@ -2,10 +2,15 @@
 
 	const NodeGrid = {
 		mounted: function(){
-			var node = this.$store.getters.getNode(this.id);
-			node.x = this.getGridPosition(this.x);
-			node.y = this.getGridPosition(this.y);
-		}				
+			//var node = this.$store.getters.getNode(this.id);
+			this.$store.commit('changeNodePropertyShadow', {
+				node: this.id, 
+				props: {
+					x: this.getGridPosition(this.x), 
+					y: this.getGridPosition(this.y)}
+				}
+			);
+		}
 	}
 
 	const WorksheetGrid = {

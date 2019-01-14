@@ -81,7 +81,7 @@
 	}
 
 	const DrawLinkComponent = {
-		mixins: [LinkComponent, WorksheetHelpers],
+		mixins: [exlink, WorksheetHelpers],
 		inject: ['getUid'],
 		
 		props: {
@@ -188,7 +188,7 @@
 			},
 			
 		},
-		template: '#linktpl'
+		template: '#ex-link-tpl'
 	}
 	Vue.component('ex-drawlink', DrawLinkComponent);
 	

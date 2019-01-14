@@ -1,4 +1,4 @@
-<template id="worksheetTpl">
+<template>
 	<svg 
 		style="width:100%;height:100%" 
 		:class="classObject" 
@@ -26,7 +26,7 @@
 		<g class="exViewport" ref="viewport">
 			<rect width="100000" height="100000" transform="translate(-50000,-50000)" :fill="'url(#' + gridId + ')'" />
 			<g class="exLinks" ref="links">
-				<component v-for="link in links"
+				<component v-for="link in links" :key="link.id" 
 					:is="link.ctor ? link.ctor : 'ex-link'"
 					:id="link.id"
 					ref="links"
@@ -48,6 +48,8 @@
 					ref="nodes"
 					class="exNode"
 					v-bind="node"					
+					:x.sync="node.x"
+					:y.sync="node.y"
 				/>
 				<slot name="nodes" />
 			</g>
@@ -66,7 +68,7 @@
 	
 <script>
 
-	var worksheetComponent = {
+	module.exports = {
 		mixins: [WorksheetGrid, WorksheetSelection, WorksheetNodeDraggable, WorksheetTooltip, WorksheetLibraryMenu],
 		inject: ['getUid'],
 		
@@ -240,20 +242,26 @@
 		},
 		
 
-		template: '#worksheetTpl'
+		//template: '#worksheetTpl'
 	};
-	Vue.component('ex-worksheet', worksheetComponent);
+	//Vue.component('ex-worksheet', worksheetComponent);
 
 
 	var titlebarButtonComponent = {
 	  inject: ['getTitleButtonPos'],
-	  
-	  data: function(){
-		  return {
-		  }
-	  },
+		
+		data: function() {
+			return {
+				classObject: {
+					canRedo: this.canRedo,
+					canUndo: this.canUndo,
+				},
+			}
+		},
 	  
 	  props: {
+		href: {},
+		action: {}
 	  },
 	  
 	  methods: {
@@ -267,25 +275,23 @@
 
 	var titleBarComponent = {
 		inject: ['getUid'],
-
 		mixins: [SvgBase],
 		
 		provide: {
 			getTitleButtonPos: function(){return Math.floor(Math.random() * Math.floor(500));}
 		},
-	  
-		data: function(){
+		
+		data: function() {
 			return {
-				mTitle: this.title,
+				classObject: {
+					canRedo: this.canRedo,
+					canUndo: this.canUndo,
+				},
 			}
 		},
 	  
-		components: {
-			'ex-titlebarbutton' : titlebarButtonComponent
-		},
-	  
 		props: {
-			title: {type: String, default: function(){return this.getUid()} }, 
+			title: {type: String, default: function(){return this.getUid()} },	
 		},
 	  
 		methods: {
@@ -319,5 +325,17 @@
 	
 	.exTitlebar text {
 		font-family: "Helvetica, Arial, sans-serif";
+	}
+	
+	.exTitlebar .button.undoredo{
+		opacity: 0.5
+	}
+	
+	.exTitlebar .button.undoredo{
+		opacity: 0.3
+	}
+
+	.exTitlebar .button:hover {
+		opacity: 1
 	}	
 </style>

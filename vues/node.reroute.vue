@@ -1,4 +1,4 @@
-<template id="exnodererouteTpl">
+<template>
 	<svg
 		:class="classObject"
 		class="nodeReroute"
@@ -26,9 +26,8 @@
 </template>
 
 <script>
-
-	const NodeRerouteComponent = {
-		mixins: [NodeComponent],
+	module.exports = {
+		mixins: [exnode],
 			
 		props: {
 			pin: {}
@@ -46,10 +45,8 @@
 		methods: {			
 			update: function(){}
 		},
-		
-		template: "#exnodererouteTpl"
 	};
-	Vue.component('ex-nodereroute', NodeRerouteComponent);
+	
 </script>
 
 <style>

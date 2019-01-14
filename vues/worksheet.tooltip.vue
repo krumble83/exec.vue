@@ -37,42 +37,6 @@
 			},
 		}
 	}
-
-/*	
-	const PinTooltip = {
-		//mixins: [WorksheetHelpers],
-		
-		created: function(){
-			this.$on('pin-mouseenter', this.mouseTooltipEnter);
-		},
-		
-		beforeDestroy: function(){
-			this.$off('pin-mouseenter', this.mouseTooltipEnter);
-		},
-		
-		methods: {
-
-			mouseTooltipEnter: function(evt){				
-				var me = this
-				, msg = 'pin desc';
-				
-				var move = function(ev){
-					me.$worksheet.showTooltip(ev, msg);
-				}
-		
-				this.$el.addEventListener('mousemove', move, false);
-
-				this.$once('pin-mouseleave', function(){
-					me.$worksheet.hideTooltip();
-					me.$el.removeEventListener('mousemove', move);
-				});
-								
-				this.$worksheet.showTooltip(evt, msg);
-				
-			}
-		}
-	}
-*/	
 </script>
 <style>
 

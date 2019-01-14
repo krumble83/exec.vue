@@ -1,4 +1,4 @@
-<template id="expinexecTpl">
+<template>
 	<svg 
 		:id="id"
 		class="pinExec"
@@ -20,7 +20,6 @@
 		<rect :transform="type=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus' + color.replace('#', '_') + ')'" />
 		<template v-if="type == 'input'">
 			<polygon points="8,6 13,6 18,11 13,16 8,16" class="pin" ref="pin" />
-			<!--<circle v-if="!isarray" cx="13" cy="10" r="5" :stroke="color" class="pin" ref="pin" />-->
 			<text x="26" y="14" class="label" ref="label">{{label}}</text>
 		</template>
 		<template v-else>
@@ -32,21 +31,13 @@
 </template>
 
 <script>
-
-	const PinExecComponent = {
-		mixins: [PinComponent],
-		template: '#expinexecTpl'
+	module.exports = {
+		mixins: [expin],
 	};
-	Vue.component('ex-pinexec', PinExecComponent);
-
-
-
-
 
 </script>
 
 <style>
-
 	.exWorksheet .exNode .exPin.pinExec polygon.pin {
 		stroke-width: 2;
 		stroke-linejoin: round;

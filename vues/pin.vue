@@ -1,4 +1,4 @@
-<template id="expinTpl">
+<template>
 	<svg 
 		:id="id"
 		:class="classObject"
@@ -33,7 +33,7 @@
 
 <script>
 
-	const PinComponent = {
+	module.exports = {
 		inject: ['addSvgDef'],
 		mixins: [SvgBase, PinDrawLink],
 		props: {
@@ -194,9 +194,9 @@
 
 		},
 		
-		template: "#expinTpl"
+		//template: "#expinTpl"
 	};
-	Vue.component('ex-pin', PinComponent);
+	//Vue.component('ex-pin', PinComponent);
 
 
 
