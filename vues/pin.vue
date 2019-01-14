@@ -35,7 +35,7 @@
 
 	const PinComponent = {
 		inject: ['addSvgDef'],
-		mixins: [SvgBase, PinDrawLink, PinForeignEditor],
+		mixins: [SvgBase, PinDrawLink],
 		props: {
 			name: {type: String, required: true},
 			height: {default: 20},
