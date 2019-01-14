@@ -9,10 +9,7 @@
 		:group="group"
 		:datatype="datatype"
 		:type="type"
-		@mousedown.left.stop="$emit('link-start', $event)"
-		@mouseup.left.stop="$emit('link-finish')"
-		@mouseenter="$emit('pin-mouseenter', $event)"
-		@mouseleave="$emit('pin-mouseleave', $event)"
+
 		@contextmenu.stop.prevent="contextMenu"
 		overflow="visible"
 		v-inline.vertical="5"
@@ -33,6 +30,10 @@
 <script>
 	module.exports = {
 		mixins: [expin],
+		
+		methods: {
+			contextMenu: function(){console.log('eee');this.$worksheet.undo();}
+		}
 	};
 
 </script>

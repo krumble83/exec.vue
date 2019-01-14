@@ -3,6 +3,7 @@
 	const NodeGrid = {
 		mounted: function(){
 			//var node = this.$store.getters.getNode(this.id);
+			return;
 			this.$store.commit('changeNodePropertyShadow', {
 				node: this.id, 
 				props: {

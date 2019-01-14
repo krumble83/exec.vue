@@ -1,34 +1,14 @@
 <script>
 
-	const WorksheetNodeDraggable = {
-		methods: {},
-		
-		created: function(){
-			var me = this;
-			
-			var update = function(evt, node){
-				console.log('coucou :)', node);
-				me.$store.commit('changeNodeProperty', {node: node.id, props: {x: node.mX, y: node.mY}});
-			}
-			
-			this.$on('node:dragend', update);
-			
-			this.$once('hook:beforeDestroy', function () {
-				this.$off('node:dragend', update);
-			});
-		}
-	}
-
-
 	const NodeDraggable = {
 		inject: ['getGridPosition'],
 		
 		created: function(){
-			this.$on('node-leftmousedown', this.dragMouseDown);
+			this.$on('mouse:leftdown', this.dragMouseDown);
 		},
 		
 		beforeDestroy: function(){
-			this.$off('node-leftmousedown', this.dragMouseDown);
+			this.$off('mouse:leftdown', this.dragMouseDown);
 		},
 		
 		data: function(){
@@ -50,42 +30,26 @@
 					return;
 
 				var point = this.getSvgPoint()
-				, startPos = {x: this.x, y: this.y}
-				//, oldPos = {x: this.x, y: this.y}
-				, offset
-				//, data = this.$store.getters.getNode(this.id);
+				, startPos = {x: this.x, y: this.y};
 				
 				this.getMousePoint(evt, point);
 				
-				offset = {x: point.x, y: point.y}
-				offset.x -= this.mX + 12;
-				offset.y -= this.mY + 12;
+				const delta = {x: point.x - (this.mX + 12), y: point.y - (this.mY + 12)}
 				
 				const updateFn = () => {
 					if (this.classObject.dragging) 
 						requestAnimationFrame(updateFn);
 					
 					if(this.getGridPosition){
-						this.mX = this.getGridPosition(point.x - offset.x);
-						this.mY = this.getGridPosition(point.y - offset.y);
-						/*
-						if(this.mX == oldPos.x && this.mY == oldPos.y)
-							return;
-						oldPos.x = this.mX;
-						oldPos.y = this.mY;
-						this.$store.commit('changeNodePropertyShadow', {
-							node: this.id, 
-							props: {
-								x: oldPos.x, 
-								y: oldPos.y}
-							}
-						);
-						*/
+						this.mX = this.getGridPosition(point.x - delta.x);
+						this.mY = this.getGridPosition(point.y - delta.y);
 					}
 					else {
-						//data.x = this.mX = point.x - offset.x;
-						//data.y = this.mY = point.y - offset.y;
+						this.mX = point.x - offset.x;
+						this.mY = point.y - offset.y;
 					}
+					this.$emit('dragmove', evt);
+					//this.$worksheet.$emit('node:dragmove', evt, this);
 				}
 				
 				const moveFn = (evt) => {
@@ -97,15 +61,16 @@
 					document.removeEventListener('mousemove', moveFn);
 					document.removeEventListener('mouseup', stopFn);
 					if(this.mX != startPos.x || this.mY != startPos.y){
-						console.log('zz');
+						this.$store.commit('changeNodeProperty', {node: this.id, props: {x: this.mX, y: this.mY}});
 						this.$emit('dragend', evt, this);
-						this.$parent.$emit('node:dragend', evt, this);
+						//this.$worksheet.$emit('node:dragend', evt, this);
 					}
 					evt.stopPropagation();
 				}
 
 				//this.$eventBus.$emit('node.dragstart', evt);
-				this.$emit('node-dragstart', evt);
+				this.$emit('dragstart', evt);
+				//this.$worksheet.$emit('node:dragstart', this, evt);
 				if(evt.defaultPrevented)
 					return;
 

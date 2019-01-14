@@ -108,23 +108,42 @@
 			changeNodeProperty: function(state, data){
 				var n = state.nodes.find(node => node.id === data.node);
 				console.assert(n);
+				var nn = Object.assign({}, n);
 				for(var index in data.props) { 
 					if (data.props.hasOwnProperty(index)) {
 						//n[index] = data.props[index];
-						Vue.set(n, index, data.props[index]);
+						Vue.set(nn, index, data.props[index]);
 					}
-				}				
+				}
+				Vue.set(state.nodes, state.nodes.indexOf(n), nn);
+				//state.nodes[]
 			},
 			
+			changeNodeProperty2: function(state, data){
+				var n = state.nodes.find(node => node.id === data.node);
+				console.assert(n);
+				var nn = Object.assign({}, n);
+				for(var index in data.props) { 
+					if (data.props.hasOwnProperty(index)) {
+						//n[index] = data.props[index];
+						Vue.set(nn, index, data.props[index]);
+					}
+				}
+				Vue.set(state.nodes, state.nodes.indexOf(n), nn);
+				//state.nodes[]
+			},
+
 			changeNodePropertyShadow: function(state, data){
 				var n = state.nodes.find(node => node.id === data.node);
 				console.assert(n);
+				var nn = Object.assign({}, n);
 				for(var index in data.props) { 
 					if (data.props.hasOwnProperty(index)) {
 						//n[index] = data.props[index];
-						Vue.set(n, index, data.props[index]);
+						Vue.set(nn, index, data.props[index]);
 					}
-				}				
+				}
+				Vue.set(state.nodes, state.nodes.indexOf(n), nn);
 			},
 
 			applyFunc: function(state, func){

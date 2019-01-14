@@ -11,7 +11,7 @@
 				this.$tooltip.setAttribute('id', 'exTooltip');
 				document.body.appendChild(this.$tooltip);
 			}
-			this.$on('pin-mouseenter', this.tooltipPinMouseEnter);
+			this.$on('mouse:enter', this.tooltipPinMouseEnter);
 		},
 		
 		methods: {	

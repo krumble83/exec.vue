@@ -5,16 +5,16 @@
 		
 		created: function(){
 			var me = this;
-			this.$on('link-start', this.startLink);
-			this.$on('link-finish', this.finishLink);
-			this.$on('pin-mouseenter', this.mouseLinkEnter);
+			this.$on('mouse:leftdown', this.startLink);
+			this.$on('mouse:leftup', this.finishLink);
+			this.$on('mouse:enter', this.mouseLinkEnter);
 			
 		},
 		
 		beforeDestroy: function(){
-			this.$off('link-start', this.startLink);
-			this.$off('link-finish', this.finishLink);
-			this.$off('pin-mouseenter', this.mouseLinkEnter);
+			this.$off('mouse:leftdown', this.startLink);
+			this.$off('mouse:leftup', this.finishLink);
+			this.$off('mouse:enter', this.mouseLinkEnter);
 		},
 		
 		methods: {
@@ -49,7 +49,7 @@
 				
 				this.$el.addEventListener('mousemove', move, false);
 
-				this.$once('pin-mouseleave', function(){
+				this.$once('mouse:leave', function(){
 					me.$worksheet.hideTooltip();
 					me.$el.removeEventListener('mousemove', move);
 				});

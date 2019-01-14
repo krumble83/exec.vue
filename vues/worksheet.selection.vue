@@ -7,53 +7,51 @@
 				}		
 			}
 		},
-	}
-
-
-	var SelectionRectangle = Vue.extend({		
-		template: '<rect :x="mX" :y="mY" width="100" height="100" class="exSelectionRectangle" />',
-	  
-		props: {
-			x: {type: Number, default: 200},
-			y: {type: Number, default: 200},
-			width: {},
-			height: {},
+		
+		created: function(){
+			this.$on('mouse:leftdown', this.selectNode);			
+		},
+		
+		beforeDestroy: function(){
+			this.$off('mouse:leftdown', this.selectNode);	
 		},
 		
 		methods: {
-			update: function(x,y){
-				this.x = x;
-				this.y = y;
-			}
-		},
-	  
-		data: function() {
-			return {
-				mX: this.x,
-				mY: this.y,
-			}
-		},
+						
+			selectNode: function(evt){
+				var me = this;
 
-	});
-	
-	
-	var WorksheetSelection = {
-		
-		created: function(){
-			var me = this;
-			this.$on('node-leftmousedown', function(node, evt){
+				console.log(evt);
+				if(evt.type == 'mousedown'){
+					this.$once('mouseup', this.selectNode);
+					//evt.preventDefault();
+					//return;
+				}
+				
+
 				if(!evt.ctrlKey)
-					me.unselectNode();
-				else if(me.isNodeSelected(node)){
-					me.unselectNode(node);
+					me.$worksheet.unselectNode();
+				else {
+					me.$worksheet.switchSelectNode(me);
 					return;
 				}
-				me.selectNode(node);
+				me.$worksheet.selectNode(me);
 				
-				//evt.preventDefault();
-			});
+				if(this.$worksheet.getNode(node => node.classObject.selected).length > 1)
+					evt.preventDefault();
 
-			this.$on('worksheet-leftmousedown', function(evt){
+			}
+			
+		}
+	}
+
+
+	var WorksheetSelection = {
+		mixins: [WorksheetHelpers],
+		created: function(){
+			var me = this;
+
+			this.$on('mouse:leftdown', function(evt){
 				if(!evt.ctrlKey)
 					me.unselectNode();	
 				me.startSelection(evt);
@@ -72,106 +70,73 @@
 		
 		methods: {			
 			unselectNode: function(node){
-				var me = this
-				, target = this.$worksheet.$refs.nodesEl;
-				
 				if(!node){
-					this.$worksheet.$refs.selection.querySelectorAll('.exNode').forEach(function(el){
-						me.unselectNode(el.__vue__);
-					});
-					return;
+					var n = this.$worksheet.getNode(node => node.classObject.selected == true);
+					n.forEach(el => el.classObject.selected = false);
 				}
-
-				target.appendChild(node.$el);
-				node.classObject.selected = false;
+				else
+					node.classObject.selected = false;
+			},
+			
+			switchSelectNode: function(node){
+				node.classObject.selected = !node.classObject.selected;
 			},
 			
 			selectNode: function(node){
-				this.$worksheet.$refs.selection.appendChild(node.$el);
 				node.classObject.selected = true;
 			},
 			
 			isNodeSelected: function(node){
-				return node.$el.parentNode == this.$worksheet.$refs.selection
+				return node.classObject.selected;
 			},
 			
 			startSelection: function(evt){
-				console.log(evt);
-				const svg = evt.currentTarget.closest("svg");
-				const point = svg.createSVGPoint();
-				const transform = svg.getScreenCTM().inverse();
+				console.log(this);
+				var point = this.$el.createSVGPoint()
+				, startPos = this.getMousePoint(evt)
+				, rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+				, req;
 				
+				this.$el.appendChild(rect);
 				
-				var instance = new SelectionRectangle();
-				instance.$mount();
-				this.getViewportEl().appendChild(instance.$el);
+				rect.setAttribute('x', startPos.x);
+				rect.setAttribute('y', startPos.y);
+				rect.setAttribute('width', 1);
+				rect.setAttribute('height', 1);
+				rect.setAttribute('class', 'exSelectionRectangle');
 				
-				//this.workspace.push(SelectionRectangle);
-				var svgDropPoint;
-				
-				const main_group_selector = svg.querySelector(".svg-pan-zoom_viewport");
-
-				var getPos = function(evt, point) {
-					svgDropPoint = svg.createSVGPoint();
-
-					svgDropPoint.x = evt.offsetX;
-					svgDropPoint.y = evt.offsetY;
-
-					svgDropPoint = svgDropPoint.matrixTransform(main_group_selector.getCTM().inverse());
-					point.x = svgDropPoint.x;
-					point.y = svgDropPoint.y;
-				}
-				
-				var newPt
-				, oPos;
-				
-				getPos(evt, point);
-				oPos = {x: point.x, y: point.y};
-				
-				//console.log(point.x);
-				//SelectionRectangle.methods.update(point.x, point.y);
-				instance.mX = point.x;
-				instance.mY = point.y;
-							
-				return;
-				
+				//this.getMousePoint(evt, point);
+								
 				const updateFn = () => {
-					if (this.classObject.dragging) 
-						requestAnimationFrame(updateFn);
-
-					newPt = point.matrixTransform(transform);
+					req = requestAnimationFrame(updateFn);
 					
-					if(this.getGridPosition){
-						this.mX = this.getGridPosition(newPt.x - offset.x);
-						this.mY = this.getGridPosition(newPt.y - offset.y);					
+					
+
+					if (point.x - startPos.x < 0) {
+						rect.setAttribute('x', rect.getAttribute('x') + rect.getAttribute('width'));
+						rect.setAttribute('width', -rect.getAttribute('width'))
 					}
-					else {
-						this.mX = newPt.x - offset.x;
-						this.mY = newPt.y - offset.y;
-					}
-					//this.$emit('dragmove', {x: this.mX, y: this.mY});
+					else
+						rect.setAttribute('width', point.x - startPos.x);
+					rect.setAttribute('height', point.y - startPos.y);					
+					
 				}
 				
 				const moveFn = (evt) => {
-					getPos(evt, point);
-					this.$emit('dragmove', evt);
+					this.getMousePoint(evt, point);
 				}
 				
 				const stopFn = (evt) => {
-					this.classObject.dragging = false;
-					svg.removeEventListener('mousemove', moveFn);
-					svg.removeEventListener('mouseup', stopFn);
-					this.$emit('dragend', evt);
+					document.removeEventListener('mousemove', moveFn);
+					document.removeEventListener('mouseup', stopFn);
+					this.$el.removeChild(rect);
+					cancelAnimationFrame(req);
 				}
 
 				requestAnimationFrame(updateFn);
 				moveFn(evt);
-
-				this.$el.parentNode.append(this.$el);
-				this.classObject.dragging = true;
-				svg.addEventListener('mousemove', moveFn);
-				svg.addEventListener('mouseup', stopFn);
-				this.$emit('dragstart', evt);			
+				document.addEventListener('mousemove', moveFn);
+				document.addEventListener('mouseup', stopFn);				
 			}
 		}
 		
@@ -179,7 +144,14 @@
 </script>
 
 <style>
+	.exWorksheet .exNode.selected > rect:first-child {
+		stroke-width: 3px;
+		stroke: url(#selectionHandlerStroke);
+	}
+
 	.exWorksheet .exSelectionRectangle{
-		
+		stroke: #fff;
+		stroke-width: 1;
+		fill: none;
 	}
 </style>

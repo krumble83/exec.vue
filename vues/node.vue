@@ -8,8 +8,8 @@
 		:height="mHeight" 
 		:type="type"
 		overflow="visible"
-		@mousedown.left.stop="leftMouseDown($event)" 
-		@contextmenu.prevent.stop="contextMenu($event)"
+		@mousedown.left.stop="$emit('mouse:leftdown', $event)" 
+		@contextmenu.prevent.stop="$emit('mouse:context', $event)"
 	>
 		<rect width="100%" height="100%" rx="13" ry="13" class="exNodeBody" />
 		
@@ -63,7 +63,7 @@
 <script>
 
 	module.exports = {
-		mixins: [SvgBase, NodeDraggable, NodeSelectable, NodeGrid],
+		mixins: [SvgBase, NodeSelectable, NodeDraggable, NodeGrid],
 			
 		props: {
 			title: String, 
@@ -87,11 +87,12 @@
 		},
 		
 		watch: {
-			mWidth: function(){this.$emit('node-resize');},
-			mHeight: function(){this.$emit('node-resize')},
+			mWidth: function(){this.$emit('node:resize');this.$worksheet.$emit('node:resize')},
+			mHeight: function(){this.$emit('node:resize');this.$worksheet.$emit('node:resize')},
 		},
 
 		created: function(){
+			console.log('created');
 			var me = this
 			, def = {
 				props: {is: 'linearGradient',id: 'nodeHeader_' + this.color.replace('#', ''),x1: '0',y1: '0',x2: '1',y2: '0.4'},
@@ -114,6 +115,7 @@
 		},
 		
 		mounted: function(){
+			console.log('mounted');
 			this.update();
 			//console.dir(this.$store.getters.getNode(this.id));
 		},
@@ -163,7 +165,7 @@
 			
 			remove: function(){
 				this.$emit('remove');
-				this.$worksheet.$emit('node-remove');
+				this.$worksheet.$emit('node:remove');
 				this.$worksheet.removeNode(this.id);
 			},
 			
@@ -186,13 +188,6 @@
 					return this.$refs['output_' + name][0];
 				return this.outputs.find(pin => pin.name === name);
 			},
-
-			contextMenu: function(){console.log('Node:Context menu');},
-			
-			leftMouseDown: function(evt){
-				this.$emit('node-leftmousedown', evt);
-				this.$parent.$emit('node-leftmousedown', this, evt);
-			}
 		},
 	};
 </script>

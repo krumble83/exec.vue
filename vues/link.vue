@@ -29,8 +29,8 @@
 						return;
 					console.log('watch input ', val, old);
 					
-					this.watchers.input.push(val.$node.$watch('x', this.update));
-					this.watchers.input.push(val.$node.$watch('y', this.update));
+					this.watchers.input.push(val.$node.$watch('mX', this.update));
+					this.watchers.input.push(val.$node.$watch('mY', this.update));
 					val.$node.$once('remove', this.remove);
 					if(old){
 						this.watchers.input.forEach(function(el){
@@ -48,8 +48,8 @@
 						return;
 					console.log('watch output', this.mOutputPin);
 					
-					this.watchers.output.push(val.$node.$watch('x', this.update));				
-					this.watchers.output.push(val.$node.$watch('y', this.update));
+					this.watchers.output.push(val.$node.$watch('mX', this.update));
+					this.watchers.output.push(val.$node.$watch('mY', this.update));
 					val.$node.$once('remove', this.remove);
 					if(old){
 						this.watchers.output.forEach(function(el){
@@ -84,9 +84,9 @@
 		},
 		
 		beforeDestroy: function(){
-			this.startSequence();		
+			this.$worksheet.startSequence();
 			this.$emit('remove');
-			this.$worksheet.$emit('link-remove', this);			
+			//this.$worksheet.$emit('link:remove', this);
 			this.watchers.input.forEach(function(el){
 				el();
 			});
@@ -98,7 +98,7 @@
 				this.mInputPin.$node.$off('remove', this.remove);
 			if(this.mOutputPin)
 				this.mOutputPin.$node.$off('remove', this.remove);
-			this.stopSequence();
+			this.$worksheet.stopSequence();
 		},
 		
 		data: function(){

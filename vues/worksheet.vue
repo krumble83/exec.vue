@@ -1,15 +1,17 @@
 <template>
 	<svg 
-		style="width:100%;height:100%" 
+		style="width:100%;height:97%" 
 		:class="classObject" 
 		xmlns="http://www.w3.org/2000/svg" 
 		ref="worksheet" 
 		@mousedown="setFocus(true)"
-		@contextmenu.prevent.stop="onContextMenu($event)" 
-		@mousedown.right="onRightButtonDown($event)"
-		@mousedown.left.stop="onLeftMouseDown($event)"
-		@mouseup.left="$emit('worksheet-leftmouseup', $event)"
-		@keyup.enter="onRightButtonDown"
+		@contextmenu.prevent.stop="$emit('mouse:context', $event)" 
+
+		@mousedown.left.stop="$emit('mouse:leftdown', $event)"
+		@mouseup.left="$emit('mouse:leftup', $event)"
+
+		@mousedown.right="$emit('mouse:rightdown', $event)"
+		@mouseup.right="$emit('mouse:rightup', $event)"
 	>
 		<defs>
 			<template v-for="(def, idx) in defs">
@@ -69,7 +71,7 @@
 <script>
 
 	module.exports = {
-		mixins: [WorksheetGrid, WorksheetSelection, WorksheetNodeDraggable, WorksheetTooltip, WorksheetLibraryMenu],
+		mixins: [VueUndoRedo, WorksheetGrid, WorksheetSelection, WorksheetTooltip, WorksheetLibraryMenu],
 		inject: ['getUid'],
 		
 		data: function(){
@@ -102,6 +104,12 @@
 			$worksheet: function(){ return this; }
 		},
 
+		created: function(){
+			var me = this;
+			this.$parent.$on('undo', function(){me.undo()})
+			this.$parent.$on('redo', function(){me.redo()})
+		},
+	  
 		methods: {
 			addNode: function(data){
 				if(!data.id)
@@ -112,7 +120,7 @@
 			
 			getNode: function(val){
 				if(typeof val == 'function')
-					return this.$refs.nodes.find(val);
+					return this.$refs.nodes.filter(val);
 				
 				// assume val is the id of node
 				return this.$refs.nodes.find(node => node.id === val);
@@ -228,10 +236,10 @@
 				this.$emit('worksheet.rightbuttonup', evt);
 			},
 			
-			onLeftMouseDown: function(evt){
+			zzzonLeftMouseDown: function(evt){
 				console.log('worksheet:onLeftButtonDown');
 				//this.$eventBus.$emit('worksheet.leftmousedown', this, evt);
-				this.$emit('worksheet-leftmousedown', evt);
+				this.$emit('leftmousedown', evt);
 				if(evt.defaultPrevented)
 					return;
 			}
@@ -263,6 +271,10 @@
 		href: {},
 		action: {}
 	  },
+		
+		created: function(){
+			this.$on('undo', function(){this.$parent.$emit('undo');})
+		},
 	  
 	  methods: {
 		test: function(){alert('t')},
@@ -275,10 +287,14 @@
 
 	var titleBarComponent = {
 		inject: ['getUid'],
-		mixins: [SvgBase],
+		mixins: [SvgBase, WorksheetHelpers],
 		
 		provide: {
 			getTitleButtonPos: function(){return Math.floor(Math.random() * Math.floor(500));}
+		},
+		
+		created: function(){
+			//this.$on('undo', function(){alert('');})
 		},
 		
 		data: function() {
