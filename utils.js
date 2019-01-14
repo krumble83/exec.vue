@@ -40,7 +40,7 @@ var Utils = {
 				xhr.send(null);
 				xhr.onreadystatechange = function() {
 					if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) {
-						Utils.Vue.parseVue(xhr.responseText);
+						Utils.Vue.parseVue(xhr.responseText, tok);
 						Utils.Vue.loadVue.apply(this, args);
 					}
 				};
@@ -60,7 +60,44 @@ var Utils = {
 				
 		},
 		
-		parseVue: function(data){
+		parseVue: function(data, name){
+			var isExport = RegExp('module.exports', 'g').test(data);
+			name = name.replace('.', '');
+			
+			if(isExport)
+				data = data.replace('module.exports', 'ex' + name);
+
+			var div = document.createElement('div');
+			div.innerHTML = data;
+			
+			if(div.querySelector('template')){
+				div.querySelectorAll('template').forEach(function(el){
+					if(isExport)
+						el.setAttribute('id', 'ex-' + name + '-tpl');
+					document.body.prepend(el);
+				});
+			}
+			
+			if(div.querySelector('script')){
+				var script = document.createElement('script');
+				script.type = "text\/javascript";
+				script.innerHTML = div.querySelector('script').innerHTML;
+				(document.head || document.getElementsByTagName("head")[0]).appendChild(script);
+				if(isExport){
+					if(!window['ex' + name]['template'])
+						window['ex' + name]['template'] = '#ex-' + name + '-tpl';
+					Vue.component('ex-' + name, window['ex' + name]);
+				}
+			}
+			if(div.querySelector('style')){
+				var script = document.createElement('style');
+				//script.type = "text\/javascript";
+				script.innerHTML = div.querySelector('style').innerHTML;
+				(document.head || document.getElementsByTagName("head")[0]).appendChild(script);
+			}
+		},
+		
+		parseVueOld: function(data, name){
 			var div = document.createElement('div');
 			div.innerHTML = data;
 			
