@@ -1,0 +1,344 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<link rel="stylesheet" type="text/css" href="css.css" media="all">
+		<script src="libs/vue.js"></script>
+		<script src="libs/vuex.js"></script>
+		<script src="utils.js"></script>
+
+		<style>
+			body, html {
+				width:100%;
+				height:100%;
+				padding:0;
+				margin:0;
+			}
+			.main {
+				float: right;
+				position: absolute;
+				right: 0;
+				padding: 5px;
+			}
+			.sidebar {
+				float: left;
+				position: absolute;
+				overflow-y: hidden;
+				border: 2px solid #606060;
+			}
+			.footer {
+				width:100%;
+				bottom:0;
+				position:absolute;
+			}
+			.header {
+				width:100%;
+			}
+			.dragbar {
+				background-color: #222222;
+				cursor: col-resize;
+			}
+			.dragbar.right {
+				width: 5px;
+				height:100%;
+				float: right;			
+			}
+			.dragbar.top {
+				width:100%;		
+				height: 5px;
+				cursor: row-resize;
+			}
+			
+			.toolbar{
+				width: 100%;
+				height: 63px;
+				background-color: #606060;
+				border-radius: 5px;
+				margin: 5px;
+			}
+			
+			
+			
+			
+
+			.tabs {
+				display: flex;
+			}
+				
+			.tab {
+				text-align: center;
+				background-color: $burnt_sienna;
+				width: 100px;
+			}
+
+			.tab > input {
+				display: none;
+			}
+				
+
+			.tab > label {
+				display: inherit;
+				font-size: 12px;
+				color: #FFF;
+				padding: 3px;
+				background-color: #434343;
+				border-radius: 5px 5px 0 0;
+				transition: 0.1s;
+				-moz-transition: 0.1s;
+				-webkit-transition: 0.1s;
+			}
+				
+
+			.tab > input:checked ~ label {
+				background: #606060;
+				color: $burnt_sienna;
+				margin: 0 2px 0 2px;
+			}
+				
+			.tab > input:not(:checked) ~ label ~ .content {
+				visibility: none;
+				z-index: 0;
+				opacity: 0;
+				top: -100000px;
+			}
+				
+			.content {
+				margin: 0 2px;
+				border: 2px solid #606060;
+				border-style:groove;
+				padding: 10px;
+				position: absolute;
+				left: 0;
+				right: 0;
+				transition: opacity .2s ease-in-out;
+				-moz-transition: opacity .2s ease-in-out;
+				-webkit-transition: opacity .2s ease-in-out;
+			}
+				
+
+		
+			
+		</style>
+		
+	</head>
+
+
+	<body>
+		<template id="exui-tab-tpl">
+			<div class="tab">
+				<input type="radio" :id="id" name="tab-group" checked>
+				<label :for="id">{{title}}</label>
+				<div class="content">
+					<h2>This is the First Tabbed Area</h2>
+					<p>
+						Look at all this space. You could put so much stuff here!<br /><br />And here!
+					</p>
+				</div>
+			</div>
+		</template>
+	
+		<div id="app">
+			<exui-panel :style="headerStyles" class="header" ref="headerPanel"></exui-panel>
+			<exui-panel :style="sidebarStyles" class="sidebar" ref="sidePanel">
+				<exui-panelsize class="dragbar right" prop="sidebarWidth" evt="pageX"></exui-panelsize>
+			</exui-panel>
+			<exui-panel :style="mainStyles" class="main" ref="mainPanel">
+				<exui-toolbar class="toolbar"></exui-toolbar>
+				<exui-tabs>
+					<exui-tab title="test" id="a1"></exui-tab>
+					<exui-tab title="blueprint 2" id=a2"></exui-tab>
+				</exui-tabs>
+			</exui-panel>
+			<exui-panel :style="footerStyles" class="footer" ref="footerPanel">
+				<exui-panelsize class="dragbar top" prop="footerHeight" evt="pageYe"></exui-panelsize>
+			</exui-panel>
+			<div id="footer">footer</div>
+		</div>		
+	
+		<script>
+
+			Vue.use(Vuex);
+
+			Vue.component('exui-tab', {
+				props: {
+					title: String,
+					id: String
+				},
+				
+				template: '#exui-tab-tpl'
+			});
+			
+			
+			
+			Vue.component('exui-tabs', {
+				props: {
+				},
+				
+				template: '<div class="tabs"><slot></slot></div>'
+			});
+			
+			Vue.component('exui-toolbar', {
+				props: {
+					styleObject: {
+					},
+					title: {}
+				},
+				
+				template: '<div class="toolbar"><slot></slot></div>'
+			});
+			
+			Vue.component('exui-panel', {
+				props: {
+					styleObject: {
+					},
+					title: {}
+				},
+				
+				template: '<div><slot></slot></div>'
+			});
+			
+			Vue.component('exui-panelsize', {
+				props: {
+					styleObject: {
+						'background-color': 'black'
+					},
+					prop: {},
+					evt: {}
+				},
+				
+				created: function(){
+					console.log(this.pos);
+				},
+				
+				methods: {
+					onMouseDown: function(evt){
+						var me = this;
+						evt.preventDefault();
+						document.addEventListener('mousemove', this.onMouseMove);
+						
+						var stop = function(){
+							document.removeEventListener('mousemove', me.onMouseMove);
+							document.removeEventListener('mouseup', stop);
+						}
+						document.addEventListener('mouseup', stop);
+					},
+					
+					onMouseMove: function(evt){
+						this.$root[this.prop] = evt[this.evt] + 2;
+					},
+				},
+				
+				template: '<div @mousedown="onMouseDown"></div>'
+			});
+			
+			
+			
+			//var store = new Vuex.Store(BlueprintStore);
+			var app = new Vue({
+				el: '#app',
+				//store,
+				props: {
+					
+				},
+				
+				directives: {
+					test: {
+					
+					}
+				
+				},
+				
+				data: function(){
+					return {
+						headerStyles: {
+							height: 18
+						},
+						sidebarStyles: {
+							top: 18,
+							'background-color': '#3e3e3e',
+							width: 200,
+							bottom: 38,
+						},
+						mainStyles: {
+							'background-color': '#222222',
+							top: 18,
+							bottom: 38,
+							left: 200,
+						},
+						footerStyles: {
+							'background-color': '#222222',
+							height: 38,
+						}
+					}
+				},
+				
+				computed: {
+					hearderHeight: {
+						set: function(val){
+							this.headerStyles.height = this.sidebarStyles.top = this.mainStyles.top = val;
+						},
+						get: function(){
+							return this.headerStyles.height;
+						}
+					},
+					
+					sidebarWidth: {
+						set: function(val){
+							this.sidebarStyles.width = this.mainStyles.left = Math.min(val, 300);
+						},
+						get: function(){
+							return this.sidebarStyles.width;
+						}
+					},
+
+					footerHeight:{
+						set: function(val){
+							this.footerStyles.height = this.mainStyles.bottom = this.sidebarStyles.bottom = val;
+						},
+						get: function(){
+							return this.footerStyles.height;
+						}					
+					}
+				},
+
+				methods: {
+					test: function(){alert('');}
+				},
+				
+				mounted: function(){
+					
+				}
+			});
+			app.title = "zizi"
+			console.log(app);
+			setTimeout(function(){
+				//app.sidebarWidth = 400;
+				console.log(app.$refs)
+			}, 1000);
+			/*
+			var i = 0;
+
+			function dragBarMouseDown(e) {
+				e.preventDefault();
+				//document.getElementById("mousestatus").innerHTML = "mousedown" + i++;
+				window.addEventListener("mousemove", windowMouseMove, false);
+				//console.log("leaving mouseDown");
+			}
+
+			function windowMouseMove(e) {
+				//document.getElementById("position").innerHTML = e.pageX + ', ' + e.pageY;
+				document.getElementById("sidebar").style.width = e.pageX + 2 + "px";
+				document.getElementById("main").style.left = e.pageX + 2 + "px";
+			}
+
+			function windowMouseUp(e) {
+				//document.getElementById("clickevent").innerHTML = 'in another mouseUp event' + i++;
+				window.removeEventListener("mousemove", windowMouseMove, false);
+			}
+
+			document.getElementById("dragbar").addEventListener("mousedown", dragBarMouseDown, false);
+
+			window.addEventListener("mouseup", windowMouseUp, false);		
+			*/
+		</script>	
+	</body>
+</html>

@@ -9,7 +9,7 @@ const VueUndoRedo = {
 			undone: [],
 			newMutation: true,
 			ignoreMutations: ['changeNodePropertyShadow'],
-			undoSequence: [],
+			sequence: 0,
 		};
 	},
 	
@@ -17,6 +17,7 @@ const VueUndoRedo = {
 		if (this.$store) {
 			this.$store.subscribe(mutation => {
 				if (mutation.type !== EMPTY_STATE && this.ignoreMutations.indexOf(mutation.type) === -1) {
+					mutation.sequence = this.sequence;
 					this.done.push(mutation);
 				}
 				if (this.newMutation) {
@@ -57,7 +58,7 @@ const VueUndoRedo = {
 			this.newMutation = false;
 			this.$store.commit(EMPTY_STATE);
 			this.done.forEach(mutation => {
-				//console.log(mutation.payload);
+				console.log(mutation.sequence);
 				switch (typeof mutation.payload) {
 					case 'object':
 						this.$store.commit(`${mutation.type}`, Object.assign({}, mutation.payload));
@@ -71,11 +72,11 @@ const VueUndoRedo = {
 		},
 		
 		startSequence: function(){
-			
+			this.sequence++;
 		},
 		
 		stopSequence: function(){
-			
+			this.sequence--;			
 		},
 	}
 };
