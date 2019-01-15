@@ -72,7 +72,7 @@ var Utils = {
 			
 			if(div.querySelector('template')){
 				div.querySelectorAll('template').forEach(function(el){
-					if(isExport)
+					if(isExport && !el.getAttribute('id'))
 						el.setAttribute('id', 'ex-' + name + '-tpl');
 					document.body.prepend(el);
 				});
