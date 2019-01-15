@@ -15,9 +15,9 @@
 	<body>
 	
 	<template id="titlebarTpl">
-		<g class="exTitlebar" @undo="$emit('undo')">
+		<g class="exTitlebar">
 			<rect width="100%" height="40"></rect>
-			<g @undo="$emit('undo')">
+			<g>
 				<slot name="buttons"></slot>
 			</g>
 			<text as="text" x="100" y="25" stroke="#fff" v-inline.horizontal="20">{{title}}</text>
@@ -30,8 +30,9 @@
 
 
 	<div id="app">
+		<ex-contextmenu ref="contextmenu"></ex-contextmenu>
 		<ex-worksheet ref="worksheet" class="exWorksheet">
-			<ex-titlebar title="toto" slot="front" @undo="$emit('undo')" >
+			<ex-titlebar title="toto" slot="front">
 				<!--
 				<ex-titlebarbutton href="img/undo.png" class="undoredo undo" slot="buttons" @click.stop="$emit('undo')" ></ex-titlebarbutton>
 				<ex-titlebarbutton href="img/redo.png" class="undoredo redo" slot="buttons" @mousedown.stop="" @click.stop="redo"></ex-titlebarbutton>
@@ -94,11 +95,12 @@
 			pin: {name: 'toto', label: '', color:'#f00', datatype: 'red'}
 		}
 
-		Utils.Vue.loadVue('mixins', 
-			'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip', 'worksheet.librarymenu'
+		Utils.Vue.loadVue('mixins', 'contextmenu'
+			, 'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip', 'worksheet.librarymenu'
 			, 'link', 'link.draw'
 			, 'node.draggable', 'worksheet',  'node', 'node.reroute'
 			, 'pin', 'pin.editors', 'pin.exec', 'pin.reroute'
+			
 			, function(){
 
 			var store = new Vuex.Store(BlueprintStore);
