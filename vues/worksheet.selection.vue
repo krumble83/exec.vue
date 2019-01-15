@@ -9,7 +9,12 @@
 		},
 		
 		created: function(){
-			this.$on('mouse:leftdown', this.selectNode);			
+			this.$on('mouse:leftdown', this.selectNode);
+			this.$on('mouse:rightup', this.selectNode);
+			
+			this.$on('cmenu', function(menu){
+				console.log('2');
+			});
 		},
 		
 		beforeDestroy: function(){
@@ -88,6 +93,12 @@
 			
 			isNodeSelected: function(node){
 				return node.classObject.selected;
+			},
+			
+			removeSelected: function(){
+				const sel = this.getNode(node => node.classObject.selected)
+				sel.forEach(function(el){})
+				
 			},
 			
 			startSelection: function(evt){

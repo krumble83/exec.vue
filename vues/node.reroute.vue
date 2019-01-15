@@ -8,11 +8,10 @@
 		:width="37" 
 		:height="26" 
 		:type="type"
-		@mousedown.left.stop="leftMouseDown($event)" 
-		@contextmenu.prevent.stop="contextMenu($event)"
+		@mousedown.left.stop="$emit('mouse:leftdown', $event)" 
+		@contextmenu.prevent.stop="$emit('mouse:context', $event)"
 	>
-		<rect width="100%" height="100%" rx="13" ry="13" class="exNodeBody" />
-		
+		<rect width="100%" height="100%" rx="13" ry="13" class="exNodeBody" />		
 		<component  
 			:is="pin.ctor ? pin.ctor : 'ex-pinreroute'"
 			:max-link="99"
@@ -43,9 +42,24 @@
 		},
 		
 		methods: {			
-			update: function(){}
+			update: function(){
+			
+			},
+			
+			getInput: function(name, asComponent){
+				if(asComponent)
+					return this.$refs['pin'];
+				return this.pin;
+			},
+
+			getOutput: function(name, asComponent){
+				if(asComponent)
+					return this.$refs['pin'];
+				return this.pin;
+			},			
 		},
 	};
+
 	
 </script>
 

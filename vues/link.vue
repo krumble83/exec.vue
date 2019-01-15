@@ -1,12 +1,18 @@
 <template>
-	<path :id="id" :stroke="color" :d="'M' + dc1.x + ',' + dc1.y + ' C' + (dp1.x) + ',' + dp1.y + ' ' + (dp2.x) + ',' + dp2.y + ' ' + dc2.x + ',' + dc2.y" fill="none" @mousedown.stop="remove" />
+	<path 
+		:id="id" 
+		:stroke="color" 
+		:d="'M' + dc1.x + ',' + dc1.y + ' C' + (dp1.x) + ',' + dp1.y + ' ' + (dp2.x) + ',' + dp2.y + ' ' + dc2.x + ',' + dc2.y" 
+		fill="none" 
+		@contextmenu.prevent.stop="$emit('mouse:context', $event)"
+	/>
 	<!--<line :id="id" :x1="dc1.x" :y1="dc1.y" :x2="dc2.x" :y2="dc2.y" :stroke="color" :class="classObject" :datatype="datatype" />-->
 </template>
 
 <script>
 
 	module.exports = {
-		mixins: [WorksheetHelpers],
+		mixins: [WorksheetHelpers, ContextMenu],
 		props: {
 			id: {type: String, default: genUid()},
 			datatype: {type: String, default: 'totoType'},
@@ -59,6 +65,18 @@
 					}
 				}
 			},
+		},
+		
+		created: function(){
+			    //<filter id="f1" x="0" y="0"><feGaussianBlur in="SourceGraphic" stdDeviation="15" /></filter>
+			var def = {
+				props: {is: 'filter',id: 'link_blur',x: 0,y: 0},
+				childs: [
+					{props: {is: 'feGaussianBlur', in:'SourceGraphic', stdDeviation:0.7}}
+				]
+			}
+			this.getWorksheet().addDef(def);			
+			
 		},
 		
 		mounted: function(){
@@ -169,20 +187,31 @@
 			
 			},
 			
+			buildContextMenu: function(menu){
+				menu.addTitle('Link');
+				menu.addItem({id: 'delete', title: 'Delete', callback: this.remove});
+				menu.addItem({id: 'goin', title: 'Goto Input', callback: function(){alert('break')}});
+				menu.addItem({id: 'goout', title: 'Goto Output', callback: function(){alert('break')}});
+			},
+
 			remove: function(){
 				console.log('remove');
 				this.$worksheet.removeLink(this.id);
 			}
 		},
-		//template: '#linktpl'
 	}
-	//Vue.component('ex-link', LinkComponent);
 	
 </script>
 
 <style>
-	.exLink{
+	.exLink {
 		stroke-width: 3;
 		pointer-events: all;
 	}
+	
+	.exLink:hover {
+		stroke-width: 4;
+		pointer-events: all;
+	}
+	
 </style>

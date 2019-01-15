@@ -9,6 +9,7 @@
 		:type="type"
 		overflow="visible"
 		@mousedown.left.stop="$emit('mouse:leftdown', $event)" 
+		@mouseup.right="$emit('mouse:rightup', $event)" 
 		@contextmenu.prevent.stop="$emit('mouse:context', $event)"
 	>
 		<rect width="100%" height="100%" rx="13" ry="13" class="exNodeBody" />
@@ -16,7 +17,7 @@
 		<g class="exNodeHeader" ref="header">
 			<path v-if="title && subtitle" :d="'m2,12c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,30l-' + (mWidth - 4) + ',0l0,-30z'" class="exHeader" :fill="'url(#nodeHeader_' + color.replace('#', '') + ')'" />
 			<path v-if="title && !subtitle" :d="'m2,11.5c0,-5 5,-10 10,-10l+' + (mWidth-24) + ',0c5,0 10,5 10,10l0,16-' + (mWidth - 4) + ',0l0,-13z'" class="exHeader" :fill="'url(#nodeHeader_' + color.replace('#', '') + ')'" />
-			<image v-if="img" :href="'img/' + img" x="10" y="6" width="16" height="16" @mousedown.stop="remove" />
+			<image v-if="img" :href="'img/' + img" x="10" y="6" width="16" height="16" />
 			<g>
 				<text v-if="title" class="exNodeTitle" :x="img ? '28' : 10" y="19">{{title}}</text>
 				<text v-if="subtitle" class="exNodeSubtitle" :x="img ? '28' : 10" y="34">{{subtitle}}</text>
@@ -63,7 +64,7 @@
 <script>
 
 	module.exports = {
-		mixins: [SvgBase, NodeSelectable, NodeDraggable, NodeGrid],
+		mixins: [SvgBase, NodeSelectable, NodeDraggable, NodeGrid, ContextMenu],
 			
 		props: {
 			title: String, 
@@ -106,13 +107,21 @@
 				]
 			}
 			this.getWorksheet().addDef(def);
+						
+			var cmen = function(menu){
+				//alert('')
+
+			};
 			
 			this.$on('pin-resize', this.update);
+			//this.$on('cmenu', this.contextMenu, {capture: true});
 		},
 		
 		beforeDestroy: function(){
-			this.$off('pin-resize', this.update);
+			this.$off('cmenu', this.contextMenu);
+			this.$off('pin-resize', this.update);		
 		},
+		
 		
 		mounted: function(){
 			console.log('mounted');
@@ -188,6 +197,19 @@
 					return this.$refs['output_' + name][0];
 				return this.outputs.find(pin => pin.name === name);
 			},
+			
+			buildContextMenu: function(menu){
+				console.log('1');
+				menu.addTitle('Node');
+				menu.addItem({id: 'delete', title: 'Delete', desc: 'Delete this node', callback: this.remove});
+				menu.addItem({id: 'duplicate', title: 'Duplicate', desc: 'Duplicate this node', callback: function(){alert('duplicate')}});
+				menu.addSeparator();
+				menu.addItem({id: 'break', title: 'Break All links', callback: function(){alert('break')}});
+				menu.addItem({id: 'selectall', title: 'Select All linked nodes', disabled: true, callback: function(){alert('selectall')}});
+				//var s = menu.addSubMenu('Break links');
+				//var s = menu.getLast();
+				//s.addItem({id: 'break', title: 'Break links', callback: function(){alert('break')}});
+			}
 		},
 	};
 </script>

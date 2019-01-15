@@ -9,10 +9,15 @@
 		:group="group"
 		:datatype="datatype"
 		:type="type"
-
-		@contextmenu.stop.prevent="contextMenu"
 		overflow="visible"
 		v-inline.vertical="5"
+
+		@mousedown.left.stop="$emit('mouse:leftdown', $event)"
+		@mouseup.left.stop="$emit('mouse:leftup')"
+		@mouseenter="$emit('mouse:enter', $event)"
+		@mouseleave="$emit('mouse:leave', $event)"
+		@mouseup.right="$emit('mouse:rightup', $event)" 
+		@contextmenu.prevent.stop="$emit('mouse:context', $event)"
 	>
 		<rect :transform="type=='output' ? 'scale(-1,1)' : ''" x="0" y="0" :width="mWidth" :height="mHeight" :fill="'url(#pinFocus' + color.replace('#', '_') + ')'" />
 		<template v-if="type == 'input'">
@@ -32,7 +37,7 @@
 		mixins: [expin],
 		
 		methods: {
-			contextMenu: function(){console.log('eee');this.$worksheet.undo();}
+			
 		}
 	};
 

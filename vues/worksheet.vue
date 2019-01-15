@@ -106,8 +106,8 @@
 
 		created: function(){
 			var me = this;
-			this.$parent.$on('undo', function(){me.undo()})
-			this.$parent.$on('redo', function(){me.redo()})
+			this.$parent.$on('undo', function(){me.undo()});
+			this.$parent.$on('redo', function(){me.redo()});
 		},
 	  
 		methods: {

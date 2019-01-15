@@ -12,7 +12,8 @@
 		@mouseup.left.stop="$emit('mouse:leftup')"
 		@mouseenter="$emit('mouse:enter', $event)"
 		@mouseleave="$emit('mouse:leave', $event)"
-		@contextmenu.stop.prevent="contextMenu"
+		@mouseup.right="$emit('mouse:rightup', $event)" 
+		@contextmenu.prevent.stop="$emit('mouse:context', $event)"
 		overflow="visible"
 		v-inline.vertical="5"
 	>
@@ -35,7 +36,7 @@
 
 	module.exports = {
 		inject: ['addSvgDef'],
-		mixins: [SvgBase, PinDrawLink],
+		mixins: [SvgBase, PinDrawLink, ContextMenu],
 		props: {
 			name: {type: String, required: true},
 			height: {default: 20},
@@ -53,29 +54,6 @@
 			editor: false,
 		},
 
-
-		created: function(){
-			var me = this
-			, def = {
-				props: {is: 'linearGradient',id: 'pinFocus_' + this.color.replace('#', '')},
-				childs: [{props : {is: 'stop','stop-color': this.color,'stop-opacity': '0.01',offset: '0.1'}},
-					{props: {is: 'stop','stop-color': this.color,'stop-opacity': '0.4',offset: '0.3'}},
-					{props: {is: 'stop','stop-color': this.color,'stop-opacity': '0.01',offset: '1'}}
-				]
-			};
-			this.$worksheet.addDef(def);
-			
-			if(this.isarray){
-				def = {
-					props: {is: 'pattern', id: 'pinArrayPattern_' + this.color.replace('#', ''), x: 0, y: 0, width: 11, height: 11, patternUnits: 'userSpaceOnUse'},
-					childs: [
-						{props: {is: 'rect', width: 2, height: 2, x: 1, y: 1, fill: this.color}}
-					]
-				};
-				this.$worksheet.addDef(def);
-			}
-		},
-		
 		data: function() {
 			return {
 				classObject: {
@@ -89,6 +67,14 @@
 				mEditor: this.editor,
 				mLinkCount: 0,
 			}
+		},
+
+		computed: {
+			$node: function(){return this.$parent;},
+			center: function(){
+				var b = this.$refs.pin.getBoundingClientRect();
+				return {x: b.left-3, y: b.top-3};
+			},
 		},
 		
 		watch: {
@@ -108,16 +94,34 @@
 			},
 		},
 		
-		mounted: function(){
-			this.update();
+		created: function(){
+			var me = this
+			, def = {
+				props: {is: 'linearGradient',id: 'pinFocus_' + this.color.replace('#', '')},
+				childs: [{props : {is: 'stop','stop-color': this.color,'stop-opacity': '0.01',offset: '0.1'}},
+					{props: {is: 'stop','stop-color': this.color,'stop-opacity': '0.4',offset: '0.3'}},
+					{props: {is: 'stop','stop-color': this.color,'stop-opacity': '0.01',offset: '1'}}
+				]
+			};
+			this.$worksheet.addDef(def);
+			
+			if(this.isarray){
+				def = {
+					props: {is: 'pattern', id: 'pinArrayPattern_' + this.color.replace('#', ''), x: 0, y: 0, width: 11, height: 11, patternUnits: 'userSpaceOnUse'},
+					childs: [
+						{props: {is: 'rect', width: 2, height: 2, x: 1, y: 1, fill: this.color}}
+					]
+				};
+				this.$worksheet.addDef(def);
+			}			
 		},
 		
-		computed: {
-			$node: function(){return this.$parent;},
-			center: function(){
-				var b = this.$refs.pin.getBoundingClientRect();
-				return {x: b.left-3, y: b.top-3};
-			},
+		beforeDestroy: function(){
+			
+		},
+				
+		mounted: function(){
+			this.update();
 		},
 		
 		methods: {
@@ -186,20 +190,21 @@
 				return 0;
 			},
 						
-			contextMenu: function(){console.log('Pin:context menu')},
+			buildContextMenu: function(menu){
+				//alert('')
+				menu.addTitle('Pin');
+				//menu.addItem({id: 'delete', title: 'Delete', desc: 'Delete this node', callback: this.remove});
+				//menu.addItem({id: 'duplicate', title: 'Duplicate', desc: 'Duplicate this node', callback: function(){alert('duplicate')}});
+				//menu.addSeparator();
+				menu.addItem({id: 'break', title: 'Break All links', callback: function(){alert('break')}});
+				menu.addItem({id: 'selectall', title: 'Select All linked nodes', disabled: true, callback: function(){alert('selectall')}});
+				//var s = menu.addSubMenu('Break links');
+				//var s = menu.getLast();
+				//s.addItem({id: 'break', title: 'Break links', callback: function(){alert('break')}});			
+			},
 			
-			//mouseEnter: function(){console.log('mouseEnter')},
-			mouseLeave: function(){console.log('mouseLeave')},
-			
-
 		},
-		
-		//template: "#expinTpl"
 	};
-	//Vue.component('ex-pin', PinComponent);
-
-
-
 
 
 </script>
