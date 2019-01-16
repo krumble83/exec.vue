@@ -1,6 +1,6 @@
 <template>
 	<ul :style="styleObject" :class="classObject">
-		<component v-for="(item, idx) in items"
+		<component v-for="(item, idx) in items" :key="idx"
 			:is="item.ctor ? item.ctor : 'ex-menuitem'"
 			ref="items"
 			v-bind="item"
@@ -37,7 +37,6 @@
 			if(this.$parent.classObject && this.$parent.classObject.sub){
 				this.styleObject = {};
 				this.classObject.exMenu = false;
-				//this.$parent.$off('click', 
 			}
 		},
 		
@@ -147,14 +146,16 @@
 		
 		methods: {
 			onContextMenu: function(evt){
-				var me = this;
-				this.$root.$refs.contextmenu.clear();
+				const me = this
+				, menu = this.$root.$refs.contextmenu;
+				
+				menu.clear();
 				Vue.nextTick(function(){
 					if(me.buildContextMenu)
-						me.buildContextMenu(me.$root.$refs.contextmenu);
-					me.$emit('cmenu', me.$root.$refs.contextmenu);
-					me.$worksheet.$emit(me.$options._componentTag + ':contextmenu', me, me.$root.$refs.contextmenu);
-					me.$root.$refs.contextmenu.showAt(evt.clientX, evt.clientY-10);					
+						me.buildContextMenu(menu);
+					me.$emit('cmenu', menu);
+					me.$worksheet.$emit(me.$options._componentTag + ':contextmenu', me, menu);
+					menu.showAt(evt.clientX, evt.clientY-10);					
 				});
 			}
 		}

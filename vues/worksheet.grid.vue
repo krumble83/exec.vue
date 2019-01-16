@@ -1,26 +1,44 @@
 <script>
 
+	
+
 	const NodeGrid = {
+		inject: ['snapToGrid'],
+		
 		mounted: function(){
-			//var node = this.$store.getters.getNode(this.id);
-			return;
-			this.$store.commit('changeNodePropertyShadow', {
-				node: this.id, 
-				props: {
-					x: this.getGridPosition(this.x), 
-					y: this.getGridPosition(this.y)}
-				}
-			);
+			this.mX = this.snapToGrid(this.x);
+			this.mY = this.snapToGrid(this.y);
+		},
+		
+		watch: {
+			mX: function(val){
+				this.mX = this.snapToGrid(val);
+			},
+			mY: function(val){
+				this.mY = this.snapToGrid(val);
+			}
 		}
 	}
 
 	const WorksheetGrid = {
 		inject: ['getUid'],
+		
+		props: {
+			snap: {default: 16},
+		},
+		
+		data: function(){
+			return {
+				//snap: 16,
+				gridId: '',
+			}
+		},		
+		
 		provide: {
-			getGridPosition: function(x, y){
-				if(typeof x !== "undefined" && typeof y === "undefined")
+			snapToGrid: function(x, y){
+				if(typeof x !== 'undefined' && typeof y === 'undefined')
 					return parseInt(x/16)*16;
-				else if(typeof y !== "undefined" && typeof x === "undefined")
+				else if(typeof y !== 'undefined' && typeof x === 'undefined')
 					return parseInt(y/16)*16;
 				else
 					return {x: parseInt(x/16)*16, y: parseInt(y/16)*16};
@@ -28,26 +46,20 @@
 		},
 		
 		created: function(){
-			var smallId = this.getUid()
+			var me = this
+			, smallId = this.getUid()
 			, medId = this.getUid()
-			,data = [
-				{props: {is: 'pattern', id: smallId,x: 0,y:0,width: 16,height: 16,patternUnits: 'userSpaceOnUse',class: 'smallGrid'},
-					childs: [{props:{is: 'path',d: 'M 16 0 L 0 0 0 16',fill: 'none'}}]
+			, data = [
+				{props: {is: 'pattern', id: smallId,x: 0,y:0,width: this.snap,height: this.snap,patternUnits: 'userSpaceOnUse',class: 'smallGrid'},
+					childs: [{props:{is: 'path',d: 'M ' + this.snap + ' 0 L 0 0 0 ' + this.snap, fill: 'none'}}]
 				},
-				{props: {is: 'pattern', id: medId,x: 0,y:0,width: 128,height: 128,patternUnits: 'userSpaceOnUse',class: 'medGrid'},
-					childs: [{props:{is: 'rect',width: '128',height: '128',fill: 'url(#' + smallId + ')'}}]
+				{props: {is: 'pattern', id: medId,x: 0, y:0, width: (this.snap*8), height: (this.snap*8), patternUnits: 'userSpaceOnUse', class: 'medGrid'},
+					childs: [{props:{is: 'rect', width: (this.snap*8), height: (this.snap*8), fill: 'url(#' + smallId + ')'}}]
 				}
 			];
 				
 			this.getWorksheet().addDef(data);
-			this.gridId = medId;			
-		},
-		
-		data: function(){
-			return {
-				snap: 16,
-				gridId: '',
-			}
+			this.gridId = medId;
 		},
 		
 		mounted: function(){		
@@ -63,6 +75,17 @@
 			});
 			this.$el._panzoom = panzoom;
 			this.$emit('panzoom', panzoom);
+		},
+		
+		methods: {
+			snaptoGridzzzzzzzzzz: function(x, y){
+				if(typeof x !== "undefined" && typeof y === "undefined")
+					return parseInt(x/16)*16;
+				else if(typeof y !== "undefined" && typeof x === "undefined")
+					return parseInt(y/16)*16;
+				else
+					return {x: parseInt(x/16)*16, y: parseInt(y/16)*16};
+			}
 		}
 	}
 

@@ -16,8 +16,9 @@ const VueUndoRedo = {
 	created() {
 		if (this.$store) {
 			this.$store.subscribe(mutation => {
+				//console.log('mutation recorded ', mutation.type)
 				if (mutation.type !== EMPTY_STATE && this.ignoreMutations.indexOf(mutation.type) === -1) {
-					mutation.sequence = this.sequence;
+					//mutation.sequence = this.sequence;
 					this.done.push(mutation);
 				}
 				if (this.newMutation) {
@@ -58,7 +59,7 @@ const VueUndoRedo = {
 			this.newMutation = false;
 			this.$store.commit(EMPTY_STATE);
 			this.done.forEach(mutation => {
-				console.log(mutation.sequence);
+				//console.log(mutation.sequence);
 				switch (typeof mutation.payload) {
 					case 'object':
 						this.$store.commit(`${mutation.type}`, Object.assign({}, mutation.payload));

@@ -16,7 +16,7 @@
 		<defs>
 			<template v-for="(def, idx) in defs">
 				<component v-bind="def.props">
-					<component v-for="(subdef, idx) in def.childs" v-bind="subdef.props" />
+					<component v-for="(subdef, idx) in def.childs" :key="idx" v-bind="subdef.props" />
 				</component>
 			</template>
 			<slot name="defs" />
@@ -50,8 +50,8 @@
 					ref="nodes"
 					class="exNode"
 					v-bind="node"					
-					:x.sync="node.x"
-					:y.sync="node.y"
+					:x="node.x"
+					:y="node.y"
 				/>
 				<slot name="nodes" />
 			</g>
@@ -115,6 +115,7 @@
 				if(!data.id)
 					data.id = this.getUid('node');
 				//this.nodes.push(data);
+				this.$emit('node:add', data);
 				this.$store.commit('addNode', data);
 			},
 			
@@ -282,7 +283,7 @@
 	  },
 		
 		created: function(){
-			this.$on('undo', function(){this.$parent.$emit('undo');})
+			//this.$on('undo', function(){this.$parent.$emit('undo');})
 		},
 	  
 	  methods: {

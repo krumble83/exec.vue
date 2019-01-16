@@ -39,8 +39,8 @@
 				<ex-titlebarbutton href="img/undo.png" class="undoredo undo" slot="buttons" @click.stop="$emit('undo')" ></ex-titlebarbutton>
 				<ex-titlebarbutton href="img/redo.png" class="undoredo redo" slot="buttons" @mousedown.stop="" @click.stop="redo"></ex-titlebarbutton>
 				-->
-				<image is="image" width="32" href="img/undo.png" class="button undoredo undo" height="32" x="10" y="3" class="undoredo undo" slot="buttons" @mousedown.stop="" @click.stop="$emit('undo')" />
-				<image is="image" width="32" href="img/redo.png" class="button undoredo redo" height="32" x="47" y="3" class="undoredo undo" slot="buttons" @mousedown.stop="" @click.stop="$emit('redo')" />
+				<image is="image" width="32" href="img/undo.png" class="button undoredo undo" height="32" x="10" y="3" slot="buttons" @mousedown.stop="" @click.stop="$emit('undo')" />
+				<image is="image" width="32" href="img/redo.png" class="button undoredo redo" height="32" x="47" y="3" slot="buttons" @mousedown.stop="" @click.stop="$emit('redo')" />
 			</ex-titlebar>
 		</ex-worksheet>
 	</div>
@@ -101,7 +101,7 @@
 			, 'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip', 'worksheet.librarymenu'
 			, 'link', 'link.draw'
 			, 'node.draggable', 'worksheet',  'node', 'node.reroute'
-			, 'pin', 'pin.editors', 'pin.exec'
+			, 'pin', 'pin.editors', 'pin.exec', 'pin.reroute'
 			
 			, function(){
 
@@ -117,17 +117,25 @@
 					title: ''
 				},
 				
+				computed:{
+				
+				},
+				
 				methods: {
 					addNode: function(data) {this.$refs.worksheet.addNode(data)},
 					addLink: function(data) {this.$refs.worksheet.addLink(data)},
 				},
 				
 				mounted: function(){
+					var me = this;
+					setTimeout(function(){
+						me.addNode(n2);
+						me.addNode(n);
+						me.addNode(n3);
+					},1000);
 				}
 			});
-			app.addNode(n2);
-			app.addNode(n);
-			app.addNode(n3);
+
 		});
 
 	</script>

@@ -76,9 +76,9 @@
 				
 				this.mH = this.point.y - this.mY;
 				
-				if (this.point.x - this.mX < 0) {
-					this.mW = -(this.point.x - this.mX);
-					this.mX = this.mX - this.mX;
+				if (this.point.x < this.mX) {
+					this.mW = this.mX - point.x;
+					this.mX = this.point.x;
 				}
 				else
 					this.mW = this.point.x - this.mX;

@@ -1,7 +1,6 @@
 <script>
 
 	const NodeDraggable = {
-		inject: ['getGridPosition'],
 		
 		created: function(){
 			this.$on('mouse:leftdown', this.dragMouseDown);
@@ -39,17 +38,11 @@
 				const updateFn = () => {
 					if (this.classObject.dragging) 
 						requestAnimationFrame(updateFn);
-					
-					if(this.getGridPosition){
-						this.mX = this.getGridPosition(point.x - delta.x);
-						this.mY = this.getGridPosition(point.y - delta.y);
-					}
-					else {
-						this.mX = point.x - offset.x;
-						this.mY = point.y - offset.y;
-					}
+
+					this.mX = point.x - delta.x;
+					this.mY = point.y - delta.y;
+
 					this.$emit('dragmove', evt);
-					//this.$worksheet.$emit('node:dragmove', evt, this);
 				}
 				
 				const moveFn = (evt) => {

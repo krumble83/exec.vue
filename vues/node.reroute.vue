@@ -29,7 +29,7 @@
 		mixins: [exnode],
 			
 		components: {
-			'ex-pinreroute': httpVueLoader('vues/node.reroute.vue')
+			//'ex-pinreroute': httpVueLoader('vues/node.reroute.vue')
 		},
 		
 		props: {
