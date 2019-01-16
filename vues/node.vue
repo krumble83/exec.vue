@@ -206,9 +206,8 @@
 				menu.addSeparator();
 				menu.addItem({id: 'break', title: 'Break All links', callback: function(){alert('break')}});
 				menu.addItem({id: 'selectall', title: 'Select All linked nodes', disabled: true, callback: function(){alert('selectall')}});
-				//var s = menu.addSubMenu('Break links');
-				//var s = menu.getLast();
-				//s.addItem({id: 'break', title: 'Break links', callback: function(){alert('break')}});
+				var s = menu.addSubMenu('submenu');
+				s.addItem({id: 'breakzz', title: 'Break linkszz', callback: function(){alert('breakzzz')}});
 			}
 		},
 	};

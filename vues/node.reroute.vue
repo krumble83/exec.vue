@@ -28,6 +28,10 @@
 	module.exports = {
 		mixins: [exnode],
 			
+		components: {
+			'ex-pinreroute': httpVueLoader('vues/node.reroute.vue')
+		},
+		
 		props: {
 			pin: {}
 		},

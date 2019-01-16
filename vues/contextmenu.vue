@@ -1,35 +1,29 @@
 <template>
-	<ul id="exMenu" :style="styleObject" :class="classObject">
+	<ul :style="styleObject" :class="classObject">
 		<component v-for="(item, idx) in items"
 			:is="item.ctor ? item.ctor : 'ex-menuitem'"
 			ref="items"
 			v-bind="item"
-		>
-			<component v-for="(subitem, idy) in item.items"
-			:is="subitem.ctor ? subitem.ctor : 'ex-menuitem'"
-			v-bind="subitem"
-			/>
-		</component>
+		></component>
 	</ul>
 </template>
 
 <template id="ex-menuitem-tpl">
-	<li :id="id" :class="classObject" :title="desc" :shortcut="shortcut" @mousedown.capture.stop="click"><a>{{title}}</a></li>
+	<li :id="id" :class="classObject" :title="desc" :shortcut="shortcut" @mousedown.stop="click">
+		<a>{{title}}</a>
+		<component is="ex-contextmenu" v-if="classObject.sub" ref="submenu"></component>
+	</li>
 </template>
 
 <script>
 
 	module.exports = {
 	
-		props: {
-			top: '0',
-			left: '0',
-		},
-	
 		data: function(){
 			return {
 				classObject: {
 					visible: false,
+					exMenu: true,
 				},
 				styleObject: {
 					left: 0,
@@ -39,17 +33,33 @@
 			}
 		},
 		
+		mounted: function(){
+			if(this.$parent.classObject && this.$parent.classObject.sub){
+				this.styleObject = {};
+				this.classObject.exMenu = false;
+				//this.$parent.$off('click', 
+			}
+		},
+		
+		beforeDestroy: function(){
+			console.log('destroy');
+			this.items = [];
+		},
+		
 		methods: {
 			addItem: function(data){
 				if(data.disabled)
 					data.classObject = {disabled: true};
+				else
+					data.classObject = {};
 				this.items.push(data);
 			},
 			
 			addSubMenu: function(str){
-				this.items.push({ctor: 'ex-menuitem', title: str, classname: 'sub'});
-				console.log(this.$refs.items[this.$refs.items.length-1]);
-				return this.$refs.items[this.$refs.items.length-1];
+				this.items.push({ctor: 'ex-menuitem', title: str, classObject: {sub: true}, submenuNode: false});
+				//this.$forceUpdate();
+				this.$mount();
+				return this.$refs.items[this.$refs.items.length-1].$refs.submenu;
 			},
 			
 			getLast: function(){
@@ -69,6 +79,12 @@
 			},
 			
 			clear: function(){
+				if(this.$refs.items){
+					this.$refs.items.forEach(function(el){
+						if(el.$refs.submenu)
+							el.$refs.submenu.clear();
+					});
+				}
 				this.items = [];
 			},
 			
@@ -78,7 +94,7 @@
 				this.styleObject.top = y;
 				this.classObject.visible = true;
 				document.addEventListener('mousedown', function(evt){
-					console.log(evt);
+					//console.log(evt);
 					me.hide();
 				}, {once: true, capture: true});
 			},
@@ -90,7 +106,7 @@
 	}
 	
 
-	Vue.component('ex-menuitem', {
+	var MenuItem = {
 		props: {
 			id: {type: String, default: genUid()},
 			classObject: {
@@ -99,19 +115,26 @@
 			title: String,
 			desc: String,
 			shortcut: String,
-			classname: String,
 			callback: {},
-			items: [],
+			ctor: {},
 		},
+		
+		beforeDestroy: function(){
+			console.log('destroy');
+			//this.items = [];
+		},
+
 		methods: {
-			click: function(evt){
+			click: function(evt){				
 				evt.stopPropagation();
 				if(typeof this.callback === 'function')
 					this.callback();
 			},
 		},
 		template: '#ex-menuitem-tpl'
-	});
+	};
+	Vue.component('ex-menuitem', MenuItem);
+	
 	
 	const ContextMenu = {
 		created: function(){
@@ -126,18 +149,20 @@
 			onContextMenu: function(evt){
 				var me = this;
 				this.$root.$refs.contextmenu.clear();
-				if(this.buildContextMenu)
-					this.buildContextMenu(this.$root.$refs.contextmenu);
-				this.$emit('cmenu', this.$root.$refs.contextmenu);
-				this.$worksheet.$emit(this.$options._componentTag + ':contextmenu', this, this.$root.$refs.contextmenu);
-				this.$root.$refs.contextmenu.showAt(evt.clientX, evt.clientY-10);
+				Vue.nextTick(function(){
+					if(me.buildContextMenu)
+						me.buildContextMenu(me.$root.$refs.contextmenu);
+					me.$emit('cmenu', me.$root.$refs.contextmenu);
+					me.$worksheet.$emit(me.$options._componentTag + ':contextmenu', me, me.$root.$refs.contextmenu);
+					me.$root.$refs.contextmenu.showAt(evt.clientX, evt.clientY-10);					
+				});
 			}
 		}
 	}
 	
 </script>
 <style>
-#exMenu {
+.exMenu {
 	position: absolute;
 	display: none;
 	top: 300px;
@@ -163,11 +188,11 @@
 	user-select: none; /* Standard */	
 }
 
-#exMenu.visible {
+.exMenu.visible {
 	display: block;
 }
 
-#exMenu ul {
+.exMenu ul {
 	display: none;
 	white-space: nowrap;
 	padding: 0; 
@@ -185,14 +210,14 @@
 }
 
 
-#exMenu li {
+.exMenu li {
 	list-style-type: none;
 	position: relative; 
 	margin: 0; 
 	padding: 0;
 }
 
-#exMenu li a {
+.exMenu li a {
 	display: block; 
 	padding: 5px 20px;
 	padding-right: 30px;
@@ -205,7 +230,7 @@
 	white-space: nowrap;
 }
 
-#exMenu li:after {
+.exMenu li:after {
     content: attr(data-shortcut) '';
 	position: absolute;
 	top: 5px; 
@@ -217,18 +242,18 @@
 }
 
 
-#exMenu li a:hover {
+.exMenu li a:hover {
 	background-color: #dea309;
 	border-radius: 2px;
 }
 
-#exMenu li.sub > a{
+.exMenu li.sub > a{
 	background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAICAYAAAAx8TU7AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QwdCgEFEqlA3AAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAN0lEQVQI122OwQ0AMAgCwY3YfwhHoh9NbO29yIGJtG0AkEQU0SEzveQs2OeTwIclJTFecS3nSwcNtxEv8+bFmQAAAABJRU5ErkJggg==');
 	background-position: 95% 50%;
 	background-repeat: no-repeat;
 }
 
-#exMenu li:hover > ul {
+.exMenu li:hover > ul {
 	display: block; 
 	position: absolute; 
 	top: -1px; 
@@ -236,7 +261,7 @@
 	white-space: nowrap;
 }
 
-#exMenu li.sep {
+.exMenu li.sep {
 	background: #666666;
 	height: 1px;
 	margin: 0 10px;
@@ -244,7 +269,7 @@
 	pointer-events: none;
 }
 
-#exMenu li.title a {
+.exMenu li.title a {
 	padding: 2px;
 	margin: 0;
 	color: #777;
@@ -252,16 +277,16 @@
 	pointer-events: none;
 }
 
-#exMenu li.title a:hover {
+.exMenu li.title a:hover {
 	background-color: #1a1a1a;
 }
 
 
-#exMenu li.disabled a{
+.exMenu li.disabled a{
 	color: #777;
 }
 
-#exMenu li.disabled a:hover {
+.exMenu li.disabled a:hover {
 	background-color: #1a1a1a;
 	pointer-events: none;
 }

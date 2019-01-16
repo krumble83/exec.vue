@@ -50,6 +50,70 @@
 		}
 	}
 
+	
+	const SelectionRect = {
+		props: {
+			x: {type: Number, default: 0},
+			y: {type: Number, default: 0},
+			width: {type: Number, default: 0},
+			height: {type: Number, default: 0},
+		},
+		
+		data: function(){
+			return {
+				mX: 0,
+				mY: 0,
+				mW: 0,
+				mH: 0,
+				startPos: {}
+			}
+		},
+		
+		methods: {
+			updateFn: function(point){
+				//console.log('zz');
+				this.req = requestAnimationFrame(this.updateFn);
+				
+				this.mH = this.point.y - this.mY;
+				
+				if (this.point.x - this.mX < 0) {
+					this.mW = -(this.point.x - this.mX);
+					this.mX = this.mX - this.mX;
+				}
+				else
+					this.mW = this.point.x - this.mX;
+
+			},
+			
+			
+			start: function(startPos, point, ctx){
+				this.startPos = startPos;
+				this.mX = startPos.x;
+				this.mY = startPos.y;
+				this.ctx = ctx;
+				this.point = point;
+				
+				document.addEventListener('mousemove', this.moveFn);
+				document.addEventListener('mouseup', this.stopFn);					
+				this.updateFn(startPos);
+			},
+			
+			moveFn: function(evt) {
+				//console.log('eee');
+				this.ctx.getMousePoint(evt, this.point);
+			},
+			
+			stopFn: function(){
+				document.removeEventListener('mousemove', this.moveFn);
+				document.removeEventListener('mouseup', this.stopFn);
+				//this.$el.removeChild(rect);
+				cancelAnimationFrame(this.req);
+				this.$el.parentNode.removeChild(this.$el);
+				delete this;
+			}
+		},
+		template: '<rect :x="mX" :y="mY" :width="mW" :height="mH" class="exSelectionRectangle"></rect>'
+	}
 
 	var WorksheetSelection = {
 		mixins: [WorksheetHelpers],
@@ -104,50 +168,14 @@
 			startSelection: function(evt){
 				console.log(this);
 				var point = this.$el.createSVGPoint()
-				, startPos = this.getMousePoint(evt)
-				, rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
-				, req;
+				, startPos = this.getMousePoint(evt);
 				
-				this.$el.appendChild(rect);
-				
-				rect.setAttribute('x', startPos.x);
-				rect.setAttribute('y', startPos.y);
-				rect.setAttribute('width', 1);
-				rect.setAttribute('height', 1);
-				rect.setAttribute('class', 'exSelectionRectangle');
-				
-				//this.getMousePoint(evt, point);
-								
-				const updateFn = () => {
-					req = requestAnimationFrame(updateFn);
-					
-					
-
-					if (point.x - startPos.x < 0) {
-						rect.setAttribute('x', rect.getAttribute('x') + rect.getAttribute('width'));
-						rect.setAttribute('width', -rect.getAttribute('width'))
-					}
-					else
-						rect.setAttribute('width', point.x - startPos.x);
-					rect.setAttribute('height', point.y - startPos.y);					
-					
-				}
-				
-				const moveFn = (evt) => {
-					this.getMousePoint(evt, point);
-				}
-				
-				const stopFn = (evt) => {
-					document.removeEventListener('mousemove', moveFn);
-					document.removeEventListener('mouseup', stopFn);
-					this.$el.removeChild(rect);
-					cancelAnimationFrame(req);
-				}
-
-				requestAnimationFrame(updateFn);
-				moveFn(evt);
-				document.addEventListener('mousemove', moveFn);
-				document.addEventListener('mouseup', stopFn);				
+				var ComponentClass = Vue.extend(SelectionRect);
+				var instance = new ComponentClass();
+				instance.$mount();
+				this.$el.appendChild(instance.$el);
+				this.getMousePoint(evt, point);
+				instance.start(startPos, point, this);
 			}
 		}
 		

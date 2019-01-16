@@ -27,7 +27,7 @@
 		<rect width="100%" height="100%" class="background" />
 		<g class="exViewport" ref="viewport">
 			<rect width="100000" height="100000" transform="translate(-50000,-50000)" :fill="'url(#' + gridId + ')'" />
-			<g class="exLinks" ref="links">
+			<g class="exLinks" ref="linksEl">
 				<component v-for="link in links" :key="link.id" 
 					:is="link.ctor ? link.ctor : 'ex-link'"
 					:id="link.id"
@@ -145,11 +145,20 @@
 			},
 			
 			getLink: function(val){
+				console.log(this.$refs.links);
+				if(!this.$refs.links && typeof val == 'function'){
+					console.log('no links in worksheet');
+					return [];
+				}
 				if(typeof val == 'function')
-					return this.$refs.links.find(val);
+					return this.$refs.links.filter(val);
 
 				// assume val is the id of node
 				return this.$refs.links.find(link => link.id === val);
+			},
+			
+			jumpToNode: function(node){
+				alert('Jump to');
 			},
 			
 			addDef: function(data){

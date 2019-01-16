@@ -158,7 +158,7 @@
 					this.mWidth = oldWidth;
 				*/
 			},
-			
+						
 			getCenter: function(){
 				var b = this.$refs.pin.getBoundingClientRect()
 				, p = this.getSvgPoint(b.left+6, b.top+6);
@@ -191,16 +191,57 @@
 			},
 						
 			buildContextMenu: function(menu){
-				//alert('')
+				const me = this
+				, links = me.$worksheet.getLink(link => ((this.isInput()) ? link.mInputPin : link.mOutputPin) == this);
+
 				menu.addTitle('Pin');
-				//menu.addItem({id: 'delete', title: 'Delete', desc: 'Delete this node', callback: this.remove});
-				//menu.addItem({id: 'duplicate', title: 'Duplicate', desc: 'Duplicate this node', callback: function(){alert('duplicate')}});
-				//menu.addSeparator();
-				menu.addItem({id: 'break', title: 'Break All links', callback: function(){alert('break')}});
-				menu.addItem({id: 'selectall', title: 'Select All linked nodes', disabled: true, callback: function(){alert('selectall')}});
-				//var s = menu.addSubMenu('Break links');
-				//var s = menu.getLast();
-				//s.addItem({id: 'break', title: 'Break links', callback: function(){alert('break')}});			
+				menu.addItem({id: 'break', title: 'Break All links', disabled: links.length == 0, callback: function(){
+					me.$worksheet.startSequence();
+					links.forEach(function(el){
+						el.remove();						
+					});
+					me.$worksheet.stopSequence();
+					
+				}});
+
+				if(links.length > 1){
+					const s = menu.addSubMenu('Break link to...');
+					links.forEach(function(el){
+						if(me.isInput())
+							s.addItem({title: me.$worksheet.getNode(el.output.node).title + ' -> ' + el.output.pin, callback: function(){
+								el.remove();
+							}});
+						else
+							s.addItem({title: me.$worksheet.getNode(el.input.node).title + ' -> ' + el.input.pin, callback: function(){
+								el.remove();
+							}});
+					});
+				}
+				
+				if(links.length > 1){
+					const ss = menu.addSubMenu('Jump to...');
+					links.forEach(function(el){
+						if(me.isInput())
+							ss.addItem({title: me.$worksheet.getNode(el.output.node).title, callback: function(){
+								me.$worksheet.jumpToNode(el)
+							}});
+						else
+							ss.addItem({title: me.$worksheet.getNode(el.input.node).title, callback: function(){
+								me.$worksheet.jumpToNode(el)
+							}});
+					});
+				}
+				else if(links.length == 1){
+					if(me.isInput())
+						menu.addItem({title: 'Jump to `' + me.$worksheet.getNode(links[0].output.node).title + '`', callback: function(){
+							me.$worksheet.jumpToNode(links[0])
+						}});
+					else
+						menu.addItem({title: 'Jump to `' +  me.$worksheet.getNode(links[0].input.node).title + '`', callback: function(){
+							me.$worksheet.jumpToNode(links[0])
+						}});
+				}
+				
 			},
 			
 		},

@@ -33,7 +33,7 @@
 				handler: function(val, old){
 					if(!val)
 						return;
-					console.log('watch input ', val, old);
+					//console.log('watch input ', val, old);
 					
 					this.watchers.input.push(val.$node.$watch('mX', this.update));
 					this.watchers.input.push(val.$node.$watch('mY', this.update));
@@ -52,7 +52,7 @@
 				handler: function(val, old){
 					if(!val)
 						return;
-					console.log('watch output', this.mOutputPin);
+					//console.log('watch output', this.mOutputPin);
 					
 					this.watchers.output.push(val.$node.$watch('mX', this.update));
 					this.watchers.output.push(val.$node.$watch('mY', this.update));
@@ -68,7 +68,6 @@
 		},
 		
 		created: function(){
-			    //<filter id="f1" x="0" y="0"><feGaussianBlur in="SourceGraphic" stdDeviation="15" /></filter>
 			var def = {
 				props: {is: 'filter',id: 'link_blur',x: 0,y: 0},
 				childs: [
@@ -195,7 +194,7 @@
 			},
 
 			remove: function(){
-				console.log('remove');
+				//console.log('remove');
 				this.$worksheet.removeLink(this.id);
 			}
 		},

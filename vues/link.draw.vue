@@ -71,7 +71,7 @@
 			},
 			
 			finishLink: function(evt){
-				console.log('finish link', this.$worksheet.$refs.drawlink);
+				//console.log('finish link', this.$worksheet.$refs.drawlink);
 				var link = this.$worksheet.$refs.drawlink;
 				if(!link || !link)
 					return;
@@ -98,30 +98,16 @@
 			}
 		},
 		
-		mounted: function(){
-			var me = this;
-			/*
-			this.$worksheet.$once('worksheet-leftmouseup', function(evt){
-				me.removeListeners();
-				if(evt.defaultPrevented)
-					return;
-
-				console.log('cancel link');
-				evt.stopPropagation();
-			});
-			*/
-		},
-
 		watch: {			
 			mEvent: {
 				immediate: true,
 				handler: function(){
 					if(!this.mEvent)
 						return;
-					console.log('watch event--------------------------------------------');
+					//console.log('watch event');
 					
 					document.addEventListener('mousemove', this.updateEvent);
-					document.addEventListener('mouseup', this.cancelLink, {once: true});
+					document.addEventListener('mouseup', this.cancel, {once: true});
 					
 					this.updateEvent(this.mEvent);
 				}
@@ -130,31 +116,43 @@
 		
 		methods: {
 			finishLink: function(pin){
-				var link = this.$worksheet.drawlink;
-				console.assert(link);
+				var d = {color: this.color, datatype: this.datatype};
 				
-				var d = {color: link.color, datatype: link.datatype};
-				if(link.inputpin){
-					d.input = {node: link.inputpin.$node.id, pin: link.inputpin.name};
+				if(this.inputpin){
+					d.input = {node: this.inputpin.$node.id, pin: this.inputpin.name};
 					d.output = {node: pin.$node.id, pin: pin.name};
 				}
-				else if(link.outputpin){
-					d.output = {node: link.outputpin.$node.id, pin: link.outputpin.name};
+				else if(this.outputpin){
+					d.output = {node: this.outputpin.$node.id, pin: this.outputpin.name};
 					d.input = {node: pin.$node.id, pin: pin.name};
 				}
 				
 				//TODO: check if link not allredy exixts
+				var l = this.$worksheet.getLink(link => link.input.node == d.input.node
+					&& link.input.pin == d.input.pin
+					&& link.output.node == d.output.node
+					&& link.output.pin == d.output.pin
+				);
+				if(l.length > 0){
+					//alert('TODO link allready exists');
+					this.cancel();
+					return;
+				}
 				
 				this.$worksheet.addLink(d);
 				this.remove();
 			},
 			
-			cancelLink: function(evt){
+			cancel: function(evt){
 				this.removeListeners();
-				this.$emit('cancel', evt, this);
-				this.$worksheet.$emit('link-cancel', evt, this);
-				if(!evt.defaultPrevented)
-					this.remove();
+				if(evt){
+					this.$emit('cancel', evt, this);
+					this.$worksheet.$emit('link-cancel', evt, this);
+					if(!evt.defaultPrevented)
+						this.remove();
+					return;
+				}
+				this.remove();
 			},
 			
 			updateEvent: function(evt){
@@ -181,7 +179,7 @@
 			},
 			
 			removeListeners: function(evt){
-				console.log('remove listeners');
+				//console.log('remove listeners');
 				document.removeEventListener('mousemove', this.updateEvent);
 				//document.removeEventListener('mouseup', this.removeListeners);
 				//evt.stopPropagation();
