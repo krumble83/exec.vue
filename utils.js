@@ -1,12 +1,4 @@
 
-function assert(ass, callback){
-	if(!ass){
-		if(typeof callback === 'function')
-			callback();
-		throw new Error('Assertion Error');
-	}
-};
-
 var Utils = {
 	Svg: {
 		getTranslate: function(str){
@@ -15,6 +7,7 @@ var Utils = {
 			return {x: parseInt(res[1]), y: parseInt(res[2])};
 		}
 	},
+	
 	Template: {
 		addProperty: function(tplId, targetSelector, pname, pvalue){
 			var tpl = document.querySelector('#' + tlpId).content;
@@ -23,6 +16,7 @@ var Utils = {
 			
 		}
 	},
+	
 	Vue: {
 		loadVue: function(){
 			
@@ -96,40 +90,8 @@ var Utils = {
 				(document.head || document.getElementsByTagName("head")[0]).appendChild(script);
 			}
 		},
-		
-		parseVueOld: function(data, name){
-			var div = document.createElement('div');
-			div.innerHTML = data;
-			
-			if(div.querySelector('template')){
-				div.querySelectorAll('template').forEach(function(el){
-					document.body.prepend(el);
-				});
-			}
-			
-			if(div.querySelector('script')){
-				var script = document.createElement('script');
-				script.type = "text\/javascript";
-				script.innerHTML = div.querySelector('script').innerHTML;
-				(document.head || document.getElementsByTagName("head")[0]).appendChild(script);
-			}
-			if(div.querySelector('style')){
-				var script = document.createElement('style');
-				//script.type = "text\/javascript";
-				script.innerHTML = div.querySelector('style').innerHTML;
-				(document.head || document.getElementsByTagName("head")[0]).appendChild(script);
-			}
-		}
 	}
 } 
-
-const Library = {
-	Link : {
-		SAME_NODE: {},
-		SAME_PIN: {}
-	}
-	
-}
 
 function nl2br (str, is_xhtml) {
     if (typeof str === 'undefined' || str === null) {
@@ -140,8 +102,7 @@ function nl2br (str, is_xhtml) {
 }
 
 function getXMLHttpRequest() {
-	var xhr = null;
-	
+	var xhr = null;	
 	if (window.XMLHttpRequest || window.ActiveXObject) {
 		if (window.ActiveXObject) {
 			try {

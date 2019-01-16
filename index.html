@@ -5,11 +5,13 @@
 		<link rel="stylesheet" type="text/css" href="css.css" media="all">
 		<script src="libs/vue.js"></script>
 		<script src="libs/vuex.js"></script>
+		<script src="libs/httpVueLoader.js"></script>
 		<!--<script src="libs/vuex-undo-redo.min.js"></script>-->
 		<script src="libs/svg-pan-zoom.js"></script>
 		<script src="libs/color.js"></script>
 		<script src="utils.js"></script>
 		<script src="libs/undoredo.js"></script>
+		<script src="js/exnode.js"></script>
 	</head>
 	
 	<body>
@@ -99,7 +101,7 @@
 			, 'worksheet.grid', 'worksheet.selection', 'worksheet.tooltip', 'worksheet.librarymenu'
 			, 'link', 'link.draw'
 			, 'node.draggable', 'worksheet',  'node', 'node.reroute'
-			, 'pin', 'pin.editors', 'pin.exec', 'pin.reroute'
+			, 'pin', 'pin.editors', 'pin.exec'
 			
 			, function(){
 
@@ -114,7 +116,7 @@
 				data: {
 					title: ''
 				},
-
+				
 				methods: {
 					addNode: function(data) {this.$refs.worksheet.addNode(data)},
 					addLink: function(data) {this.$refs.worksheet.addLink(data)},
